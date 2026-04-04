@@ -1,3 +1,12 @@
+<!-- ORCHESTRA INTEGRATION -->
+## Ecosystem Integration
+This project is part of the Coastalbee project orchestra.
+- **Role**: Skills library — all projects search here for pre-built skills
+- **Custom skills**: Add to `skills/custom/` with `cb-` prefix
+- **Registry**: See `Z:\Projects\.orchestra\registry.json` (Phase 2)
+- **Category**: B (Reference library with customization)
+<!-- END ORCHESTRA INTEGRATION -->
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
