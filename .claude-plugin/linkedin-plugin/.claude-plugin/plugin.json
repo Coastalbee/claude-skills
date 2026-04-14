@@ -1,0 +1,9 @@
+{
+  "name": "linkedin",
+  "version": "0.4.0",
+  "description": "LinkedIn content — post writing, profile optimization, content ideation, and 30-day calendar planning for LinkedIn's format and algorithm.",
+  "author": {
+    "name": "Alex McFarland",
+    "url": "https://alexmcfarland.ai"
+  }
+}

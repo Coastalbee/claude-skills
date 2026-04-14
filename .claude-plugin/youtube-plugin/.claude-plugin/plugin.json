@@ -1,0 +1,9 @@
+{
+  "name": "youtube",
+  "version": "0.1.2",
+  "description": "YouTube content production — scripts, titles, and descriptions. Hook-driven scripts with retention techniques, title generation across proven click patterns, and SEO-optimized descriptions.",
+  "author": {
+    "name": "Alex McFarland",
+    "url": "https://alexmcfarland.ai"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "substack",
+  "version": "0.3.2",
+  "description": "Substack newsletters and Notes — 13 skills covering opinion pieces, how-to guides, case studies, listicles, tips, curation roundups, mistakes, reasons-why, contrarian takes, story-lessons, launch announcements, welcome sequences, and Substack Notes.",
+  "author": {
+    "name": "Alex McFarland",
+    "url": "https://alexmcfarland.ai"
+  }
+}

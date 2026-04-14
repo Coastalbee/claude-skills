@@ -1,0 +1,9 @@
+{
+  "name": "blog",
+  "version": "0.1.2",
+  "description": "Blog content skills — long-form articles, step-by-step how-to guides, and SEO optimization. Production-ready formats for blogs, content marketing, and organic search.",
+  "author": {
+    "name": "Alex McFarland",
+    "url": "https://alexmcfarland.ai"
+  }
+}
