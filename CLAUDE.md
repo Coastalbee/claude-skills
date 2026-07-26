@@ -1,9 +1,9 @@
-<!-- L3 | MAX: 150 lines | Scaffold: 2026-05-27 -->
+<!-- L3 | MAX: 150 lines | Scaffold: 2026-05-27 | Synced: 2026-07-26 -->
 # claude-skills — Skill Reference Library
 
 ## Role in Ecosystem
 
-Comprehensive skills library for Claude AI and Claude Code — 268+ production-ready skills across 9 domains. Reference repository: teams download and deploy skill packages into their own workflows. Also hosts Coastalbee custom skills under `skills/custom/` with `cb-` prefix.
+Comprehensive skills library for Claude AI and Claude Code — 362+ production-ready skills across 18 domains. Reference repository: teams download and deploy skill packages into their own workflows. Also hosts Coastalbee custom skills under `skills/custom/` with `cb-` prefix.
 
 ## Quick Navigation
 
@@ -22,6 +22,8 @@ Comprehensive skills library for Claude AI and Claude Code — 268+ production-r
 | Agents | `agents/` | 16 cs-* prefixed agents |
 | Standards | `standards/` | Communication, quality, git, security standards |
 | Templates | `templates/` | Reusable templates |
+
+*(Table lists the domains present at the 2026-05-27 scaffold. Upstream has since added `business-operations/`, `commercial/`, `research/`, `research-ops/`, `markdown-html/`, and `compliance-os/` — see upstream's `CHANGELOG.md` for the full per-domain breakdown.)*
 
 ## Skill Package Structure
 
@@ -48,20 +50,35 @@ Custom skills built in Skills Factory are published here:
 4. Documentation-driven: SKILL.md is the authoritative source per skill
 5. Platform-specific guidance > generic advice
 
+## Development Environment
+
+No build system or test framework by design (portability). Python scripts are stdlib-only; if a script ever needs a dependency, keep it to `pip install <package>` at most and document it in that skill's SKILL.md. Validation = each script passing its own `--help`/`--sample` smoke test, plus `scripts/derive_counters.py --check` for doc/counter drift — there is nothing to `npm install` or `pytest` at the repo root.
+
 ## Repository Stats
 
-- **205** production-ready skills
-- **268** Python automation tools (all verified `--help` passing)
-- **384** reference guides
-- **16** agents
-- **19** slash commands
-- **Version**: v2.1.2
+- **362** production-ready skills
+- **635** Python automation tools (all verified `--help` passing)
+- **732** reference guides
+- **99** agents
+- **111** slash commands
+- **88** marketplace plugins across 18 domains
+- **Version**: v2.11.2 (synced from upstream 2026-07-26)
 
 ## Git Workflow
 
 Branch strategy: `feature/ → dev → main` (PR only). Main requires PR approval.
 
 Conventional commits: `feat(domain): description`, `fix(tool): description`, `docs(workflow): description`
+
+> **⛔ HARD RULE (upstream) — PR TARGET IS ALWAYS `dev`, NEVER `main`.** Every PR must use `--base dev`; `main` only receives periodic `dev → main` promotion PRs from the upstream maintainer. Branch protection blocks direct pushes to `main`.
+
+## Publishing Constraints (ClawHub, non-negotiable — upstream)
+
+1. `cs-` prefix applies only on slug conflicts, only on the ClawHub registry — never rename repo folders/local skill names to match.
+2. No paid/commercial API dependencies (free-tier or BYOK only).
+3. Rate limit: 5 new skills/hour on ClawHub — use the drip timer for bulk publishes.
+4. `plugin.json` must carry the required schema fields; only `source` and `attribution` are approved extensions, and all `skills` paths must be relative + `./`-prefixed (enforced by `scripts/check_plugin_json.py --all` in CI).
+5. ClawHub package version must match the repo release version.
 
 ## Subdirectory CLAUDE.md → README.md
 

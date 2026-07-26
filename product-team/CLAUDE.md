@@ -1,10 +1,33 @@
 # Product Team Skills - Claude Code Guidance
 
-This guide covers the 14 production-ready product management skills and their Python automation tools.
+This guide covers the 17 production-ready product management skills (13 bundled incl. the orchestrator + 4 standalone plugins) and their Python automation tools.
+
+## Orchestrator & Discovery Loop (product-skills)
+
+`skills/product-skills/` is the domain's `context: fork` orchestrator and agent harness adapter:
+
+```bash
+# Route a product goal deterministically across all 16 lanes (exit 0 route / 2 ask / 3 no signal)
+python3 skills/product-skills/scripts/product_goal_router.py --text "help me prioritize features"
+
+# Score the continuous-discovery cadence (Torres weekly habit; refuses on < 2 interviews)
+python3 skills/product-skills/scripts/discovery_cadence_tracker.py --input discovery_log.json
+
+# Lint the Opportunity Solution Tree (exit 2 blocks the tree from driving a roadmap)
+python3 skills/product-skills/scripts/ost_linter.py --input ost.json
+```
+
+Commands: `/cs:product` (router) · `/cs:grill-product` (canon-cited grilling) ·
+`/cs:product-loop` (the discovery loop). Agent: `cs-product-orchestrator`. Build-scale
+goals compile through `engineering/agent-harness` with the `product-team.json` manifest.
+Hard rules: no roadmap cites a tree that fails the linter; single-participant claims are
+anecdotes; AI features ship with eval specs (see
+`skills/product-skills/references/ai_product_evals.md`).
 
 ## Product Skills Overview
 
 **Available Skills:**
+0. **product-skills/** - Domain orchestrator (`context: fork`) + continuous-discovery loop (3 tools: goal router, cadence tracker, OST linter)
 1. **product-manager-toolkit/** - RICE prioritization, customer interview analysis (2 tools)
 2. **agile-product-owner/** - User story generation, sprint planning (1 tool)
 3. **product-strategist/** - OKR cascade, strategic planning (1 tool)
@@ -19,12 +42,14 @@ This guide covers the 14 production-ready product management skills and their Py
 12. **roadmap-communicator/** - Roadmap communication and changelog generation (1 tool)
 13. **code-to-prd/** - Reverse-engineer any codebase into PRD (2 tools: codebase_analyzer, prd_scaffolder)
 14. **research-summarizer/** - Research synthesis and summarization (1 tool)
+15. **apple-hig-expert/** - Apple Human Interface Guidelines compliance and design (1 tool: hig_checker)
+16. **spec-to-repo/** - Convert a spec document into a scaffolded repository
 
-**Total Tools:** 16 Python automation tools
+**Total Tools:** 22 Python automation tools
 
-**Agents:** 5 (cs-product-manager, cs-agile-product-owner, cs-product-strategist, cs-ux-researcher, cs-product-analyst)
+**Agents:** 6 (cs-product-orchestrator, cs-product-manager, cs-agile-product-owner, cs-product-strategist, cs-ux-researcher, cs-product-analyst)
 
-**Slash Commands:** 8 (/rice, /okr, /persona, /user-story, /competitive-matrix, /prd, /sprint-plan, /code-to-prd)
+**Slash Commands:** 11 (/cs:product, /cs:grill-product, /cs:product-loop, /rice, /okr, /persona, /user-story, /competitive-matrix, /prd, /sprint-plan, /code-to-prd)
 
 ## Python Automation Tools
 
@@ -310,7 +335,7 @@ python roadmap-communicator/scripts/changelog_generator.py --from v1.0.0 --to HE
 
 ---
 
-**Last Updated:** March 17, 2026
-**Skills Deployed:** 14/14 product skills production-ready
-**Total Tools:** 16 Python automation tools
-**Agents:** 5 | **Commands:** 8
+**Last Updated:** July 3, 2026
+**Skills Deployed:** 17/17 product skills production-ready (product-skills is now a fork-orchestrator + discovery loop)
+**Total Tools:** 22 Python automation tools
+**Agents:** 6 | **Commands:** 11
