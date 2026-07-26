@@ -1,0 +1,11 @@
+{
+  "name": "claude-skills",
+  "version": "1.0.0",
+  "category": "B",
+  "capabilities": [
+    "serve"
+  ],
+  "commands": [],
+  "entry_points": {},
+  "registered": "2026-06-05T07:31:28.634372+00:00"
+}
