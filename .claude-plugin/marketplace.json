@@ -8,7 +8,7 @@
   "homepage": "https://github.com/alirezarezvani/claude-skills",
   "repository": "https://github.com/alirezarezvani/claude-skills",
   "metadata": {
-    "description": "362 production-ready skills across 18 domains (engineering, engineering-core, marketing, product, c-level, compliance-os, project management, RA/QM, business growth, finance, productivity, marketing top-level, research, research-ops, business-operations, commercial, markdown-html, loop-library, plus standards). 644 Python tools, 741 reference guides, 102 agents (cs-* + personas), 116 slash commands across 88 marketplace plugins. v2.11.2 vendors engineering/skillopt-sleep — a verbatim copy of microsoft/SkillOpt's stdlib-only skillopt_sleep engine + Claude Code plugin surface, giving a local agent a nightly gated self-improvement cycle (read-only session harvest -> mine -> offline replay -> held-out-gated CLAUDE.md/SKILL.md edits -> staged for explicit /skillopt-sleep adopt). productivity/fable-goal (unreleased, post-v2.11.1) converts a rambling description of a desired outcome into one polished /goal prompt for a fresh autonomous session. v2.11.1 turns product-team and project-management into agent-harness domains: fork-orchestrators with deterministic goal routers, a Jira MCP snapshot bridge (Kanban flow metrics + Monte Carlo forecasting), a delegation-governance loop gate, a continuous-discovery cadence tracker, and an Opportunity Solution Tree linter, with /cs:pm and /cs:product command families. v2.10.3 completes the markdown-html domain with md-slides — slide-deck converter (arrow-key / Space / PgDn / Home/End / P keyboard navigation + presenter mode with split-view clock + speaker notes + next-slide preview + URL-hash deep linking like #3 for direct slide jumps + @media print page-per-slide for browser-native PDF export). Reuses md-document's markdown parser; vanilla JS only (no framework runtime); Prism.js opt-in via --syntax. Joins md-review (v2.10.2 code-review converter), md-document (v2.10.1 long-form converter), and the v2.10.0 foundation (orchestrator + design-system). Compatible with Claude Code, Codex CLI, Gemini CLI, Cursor, OpenClaw, Hermes Agent, Mistral Vibe, and 5 more coding agents.",
+    "description": "362 production-ready skills across 18 domains (engineering, engineering-core, marketing, product, c-level, compliance-os, project management, RA/QM, business growth, finance, productivity, marketing top-level, research, research-ops, business-operations, commercial, markdown-html, loop-library, plus standards). 644 Python tools, 741 reference guides, 102 agents (cs-* + personas), 116 slash commands across 98 marketplace plugins (10 added: the Co-Writer System content plugins — blog, landing-page, linkedin, setup, substack, voice, youtube, co-writer-setup, podcast, plugin-marketplace-builder — imported from 00-writer with author permission, MIT-licensed). v2.11.2 vendors engineering/skillopt-sleep — a verbatim copy of microsoft/SkillOpt's stdlib-only skillopt_sleep engine + Claude Code plugin surface, giving a local agent a nightly gated self-improvement cycle (read-only session harvest -> mine -> offline replay -> held-out-gated CLAUDE.md/SKILL.md edits -> staged for explicit /skillopt-sleep adopt). productivity/fable-goal (unreleased, post-v2.11.1) converts a rambling description of a desired outcome into one polished /goal prompt for a fresh autonomous session. v2.11.1 turns product-team and project-management into agent-harness domains: fork-orchestrators with deterministic goal routers, a Jira MCP snapshot bridge (Kanban flow metrics + Monte Carlo forecasting), a delegation-governance loop gate, a continuous-discovery cadence tracker, and an Opportunity Solution Tree linter, with /cs:pm and /cs:product command families. v2.10.3 completes the markdown-html domain with md-slides — slide-deck converter (arrow-key / Space / PgDn / Home/End / P keyboard navigation + presenter mode with split-view clock + speaker notes + next-slide preview + URL-hash deep linking like #3 for direct slide jumps + @media print page-per-slide for browser-native PDF export). Reuses md-document's markdown parser; vanilla JS only (no framework runtime); Prism.js opt-in via --syntax. Joins md-review (v2.10.2 code-review converter), md-document (v2.10.1 long-form converter), and the v2.10.0 foundation (orchestrator + design-system). Compatible with Claude Code, Codex CLI, Gemini CLI, Cursor, OpenClaw, Hermes Agent, Mistral Vibe, and 5 more coding agents.",
     "version": "2.11.2"
   },
   "plugins": [
@@ -1862,6 +1862,167 @@
         "collab-proof"
       ],
       "category": "engineering"
+    },
+    {
+      "name": "blog",
+      "source": "./.claude-plugin/blog-plugin",
+      "description": "Blog content skills — long-form articles, step-by-step how-to guides, and SEO optimization.",
+      "version": "0.1.2",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "blog",
+        "content",
+        "writing",
+        "seo",
+        "how-to"
+      ],
+      "category": "marketing"
+    },
+    {
+      "name": "landing-page",
+      "source": "./.claude-plugin/landing-page-plugin",
+      "description": "Landing page skills — sales pages, product pages, opt-in pages, and full HTML/CSS page builds.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "landing-page",
+        "sales-page",
+        "cro",
+        "html",
+        "conversion"
+      ],
+      "category": "marketing"
+    },
+    {
+      "name": "linkedin",
+      "source": "./.claude-plugin/linkedin-plugin",
+      "description": "LinkedIn content — post writing, profile optimization, content ideation, and 30-day calendar planning.",
+      "version": "0.4.0",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "linkedin",
+        "social-media",
+        "content",
+        "profile-optimization"
+      ],
+      "category": "marketing"
+    },
+    {
+      "name": "setup",
+      "source": "./.claude-plugin/setup-plugin",
+      "description": "Set up and maintain your Co-Writer System — build your CLAUDE.md, create your workspace, and keep everything current.",
+      "version": "0.7.1",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "setup",
+        "onboarding",
+        "co-writer",
+        "configuration"
+      ],
+      "category": "productivity"
+    },
+    {
+      "name": "substack",
+      "source": "./.claude-plugin/substack-plugin",
+      "description": "Substack newsletters and Notes — 13 skills covering opinion pieces, how-to guides, case studies, listicles, and more.",
+      "version": "0.3.2",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "substack",
+        "newsletter",
+        "writing",
+        "content"
+      ],
+      "category": "marketing"
+    },
+    {
+      "name": "voice",
+      "source": "./.claude-plugin/voice-plugin",
+      "description": "Build, audit, and maintain voice profiles — capture how you (or your client) writes so Claude produces authentic content.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "voice",
+        "brand-voice",
+        "writing-style",
+        "authenticity"
+      ],
+      "category": "marketing"
+    },
+    {
+      "name": "youtube",
+      "source": "./.claude-plugin/youtube-plugin",
+      "description": "YouTube content production — scripts, titles, and descriptions with retention techniques and SEO optimization.",
+      "version": "0.1.2",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "youtube",
+        "video",
+        "scripts",
+        "titles"
+      ],
+      "category": "marketing"
+    },
+    {
+      "name": "co-writer-setup",
+      "source": "./.claude-plugin/co-writer-setup",
+      "description": "Builds a complete co-writing system by interviewing the user and generating USER.md, BUSINESS.md, and ICP.md context files.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "co-writer",
+        "onboarding",
+        "context",
+        "setup"
+      ],
+      "category": "productivity"
+    },
+    {
+      "name": "podcast",
+      "source": "./.claude-plugin/podcast-plugin",
+      "description": "Podcast content from outlines to show notes — episode outlines, descriptions, and detailed show notes.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "podcast",
+        "show-notes",
+        "episode-outline"
+      ],
+      "category": "marketing"
+    },
+    {
+      "name": "plugin-marketplace-builder",
+      "source": "./.claude-plugin/plugin-marketplace-builder",
+      "description": "Build and maintain Claude plugin marketplaces — plugin structure, command format, marketplace.json spec, and GitHub deployment.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Alex McFarland"
+      },
+      "keywords": [
+        "plugin",
+        "marketplace",
+        "development",
+        "claude-code"
+      ],
+      "category": "development"
     }
   ]
 }

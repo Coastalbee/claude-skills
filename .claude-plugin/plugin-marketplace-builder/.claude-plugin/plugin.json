@@ -1,0 +1,19 @@
+{
+  "name": "plugin-marketplace-builder",
+  "version": "0.1.0",
+  "description": "Build and maintain Claude plugin marketplaces. Use when creating new plugins, adding plugins to a marketplace GitHub repo, updating existing plugin commands or skills, or setting up a private skill library. Covers plugin structure, command format, marketplace.json spec, and GitHub deployment.",
+  "author": {
+    "name": "Alex McFarland",
+    "url": "https://alexmcfarland.ai"
+  },
+  "homepage": "https://github.com/Coastalbee/claude-skills/tree/main/.claude-plugin/plugin-marketplace-builder",
+  "repository": "https://github.com/Coastalbee/claude-skills",
+  "license": "MIT",
+  "skills": ["./"],
+  "attribution": {
+    "derived_from": "Alex McFarland's Co-Writer System",
+    "original_author": "Alex McFarland (alexmcfarland.ai)",
+    "original_license": "MIT",
+    "derivation_note": "Imported verbatim from the Co-Writer System (via 00-writer/Plugins/plugin-marketplace-builder) with the original author's permission. Content unmodified from source."
+  }
+}

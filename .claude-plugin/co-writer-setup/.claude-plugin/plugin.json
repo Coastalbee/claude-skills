@@ -1,0 +1,19 @@
+{
+  "name": "co-writer-setup",
+  "version": "0.1.0",
+  "description": "Builds a complete co-writing system by interviewing the user and generating three context files — USER.md, BUSINESS.md, and ICP.md — that every other Co-Writer System skill reads before writing. Use when a user wants to set up their co-writing system from scratch or rebuild their context profiles.",
+  "author": {
+    "name": "Alex McFarland",
+    "url": "https://alexmcfarland.ai"
+  },
+  "homepage": "https://github.com/Coastalbee/claude-skills/tree/main/.claude-plugin/co-writer-setup",
+  "repository": "https://github.com/Coastalbee/claude-skills",
+  "license": "MIT",
+  "skills": ["./"],
+  "attribution": {
+    "derived_from": "Alex McFarland's Co-Writer System",
+    "original_author": "Alex McFarland (alexmcfarland.ai)",
+    "original_license": "MIT",
+    "derivation_note": "Imported verbatim from the Co-Writer System (via 00-writer/Plugins/co-writer-setup) with the original author's permission. Content unmodified from source."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "podcast",
+  "version": "0.1.0",
+  "description": "Podcast content from outlines to show notes — episode outlines with segments and talking points, discovery-optimized episode descriptions, and detailed show notes with timestamps and key takeaways.",
+  "author": {
+    "name": "Alex McFarland",
+    "url": "https://alexmcfarland.ai"
+  },
+  "homepage": "https://github.com/Coastalbee/claude-skills/tree/main/.claude-plugin/podcast-plugin",
+  "repository": "https://github.com/Coastalbee/claude-skills",
+  "license": "MIT",
+  "skills": ["./skills"],
+  "attribution": {
+    "derived_from": "Alex McFarland's Co-Writer System",
+    "original_author": "Alex McFarland (alexmcfarland.ai)",
+    "original_license": "MIT",
+    "derivation_note": "Imported verbatim from the Co-Writer System (via 00-writer/Plugins/podcast-plugin) with the original author's permission. Content unmodified from source."
+  }
+}
