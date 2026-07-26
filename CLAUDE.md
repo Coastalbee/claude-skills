@@ -56,12 +56,14 @@ No build system or test framework by design (portability). Python scripts are st
 
 ## Repository Stats
 
-- **362** production-ready skills
-- **635** Python automation tools (all verified `--help` passing)
-- **732** reference guides
-- **99** agents
-- **111** slash commands
-- **88** marketplace plugins across 18 domains
+Derived ground truth via `python scripts/derive_counters.py` (run `--check` to verify docs still match — upstream's own README/marketplace.json badges are currently stale against this):
+
+- **452** skills across **20** domains
+- **685** Python automation tools
+- **759** reference guides
+- **136** agents
+- **116** slash commands
+- **95** marketplace plugins on disk (**88** registered — 7-plugin registration gap, inherited from upstream)
 - **Version**: v2.11.2 (synced from upstream 2026-07-26)
 
 ## Git Workflow
