@@ -1,9 +1,10 @@
 ---
+name: cs-backend-review
 description: Backend engineering review — walks the 7 Matt Pocock forcing questions (read/write ratio + QPS, tenancy, sync vs async, data sensitivity, pattern, RPO/RTO, SLO), picks the language + pattern profile, forks into specialists (api-design-reviewer, database-designer, migration-architect, slo-architect). Invokes the cs-backend-engineer agent with context fork.
 argument-hint: "<problem or service to review>"
 ---
 
-# /cs:backend-review — Backend engineering review
+# /cs-backend-review — Backend engineering review
 
 Use the `cs-backend-engineer` agent (uses `context: fork`) to handle this inquiry:
 
@@ -69,8 +70,8 @@ Profiles live at `engineering-team/skills/senior-backend/profiles/`. Four built-
 
 ## Related commands
 
-- `/cs:fullstack-review` — full-stack lens (parent)
-- `/cs:frontend-review` — for API consumer side
-- `/cs:engineer-grill` — cross-role 21-question grill
+- `/cs-fullstack-review` — full-stack lens (parent)
+- `/cs-frontend-review` — for API consumer side
+- `/cs-engineer-grill` — cross-role 21-question grill
 - `/slo-design` — explicit SLO design via slo-architect
 - `/karpathy-check` — Karpathy 4-principle review

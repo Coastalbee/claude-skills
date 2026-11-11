@@ -5,7 +5,1201 @@ All notable changes to the Claude Skills Library will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — fable-goal: ramble → autonomous /goal prompt (this PR)
+## [Unreleased]
+
+## [2.14.11] - 2026-11-11 — CRA, IEC 62304 and skill hints
+
+Two new compliance plugins: cra-readiness for the EU Cyber Resilience Act, whose Article 14 reporting already
+applies, and medical-device-software for IEC 62304 and IEC 81001-5-1. Eight plugins now ship a quiet
+`UserPromptSubmit` hook that names one of 21 skills that never loaded on their own when a prompt clearly fits it;
+it makes no model or network calls, and `SKILL_ROUTER=0` turns it off (`SKILL_ROUTER_<PLUGIN>=0` for one plugin).
+No renames, so nothing needs a reinstall: `claude plugin update` picks up the hooks, and the new plugins install
+as usual. Changed plugins are bumped; plugins above 2.14.11 from earlier releases keep their versions (gate G11).
+
+### Added
+
+- **cra-readiness plugin: EU Cyber Resilience Act (Regulation (EU) 2024/2847)** (`ra-qm-team/cra-readiness`, also
+  bundled in ra-qm-skills). Article 14 reporting has applied since 11 September 2026 to every in-scope product on
+  the EU market, including products shipped before the CRA; everything else applies from 11 December 2027. Four
+  deterministic stdlib scripts: `cra_scope_classifier.py` (scope and Art 2 exclusions, roles under Arts 19-22 and 24,
+  Annex III/IV class, the conformity routes Art 32 allows, legacy products under Art 69, the Art 13(8) support
+  period, and the CSIRT that receives reports under Art 14(7)); `art14_report_clock.py` (24 h early warning, 72 h
+  notification, final report 14 days after a fix or one month after an incident notification, required content,
+  user notice under Art 14(8), and the Art 64(10)(a) SME carve-out); `annex_i_gap_check.py` (39 ids across Annex I
+  Parts I and II, Annex VII and Annex II, refusing NA on vulnerability handling); `sbom_check.py` (CycloneDX or SPDX
+  JSON, primary component, top-level dependencies per Annex I Part II(1)). Ships the cs-cra-officer agent,
+  `/cs-cra-readiness` and `/cs-cra-report`, three references citing the regulation, Implementing Regulation (EU)
+  2025/2392 and Commission guidance C(2026) 5252, and an Article 14 runbook.
+- **Skill hints for 21 skills that never loaded on their own.** Eight plugins (engineering-skills,
+  engineering-advanced-skills, marketing-skills, product-skills, c-level-skills, agenthub, autoresearch-agent,
+  si) now ship a `UserPromptSubmit` hook, `hooks/skill_router.py`, that names the fitting skill when a prompt
+  clearly matches one (tdd-guide, senior-backend/frontend/devops/secops/data-scientist, gcp-cloud-architect,
+  minimalist, codebase-onboarding, self-eval, tech-debt-tracker, copy-editing, content-humanizer,
+  marketing-psychology, experiment-designer, product-manager-toolkit, roadmap-communicator, cto-advisor,
+  agenthub, autoresearch-agent, remember). Silent otherwise, one hint per plugin per prompt, once per session,
+  no model or network calls; `SKILL_ROUTER=0` turns it off. Measured live on held-out prompts: the skills
+  loaded in 24/84 runs with the hook against 2/84 without, and 0/21 on near misses either way. No new commands:
+  every skill is already `/<plugin>:<skill>`. Per-skill decisions in `audit/silent-skill-triggers-2026-11/`;
+  `scripts/check_skill_router.py` (CI) keeps the copies identical and the routes valid.
+- Daily triage pipeline for community PRs and issues: `scripts/triage_snapshot.py` lists every open item with mechanical signals (CI or manifest changes, network and LLM calls in added code, new dependencies, external domains, commercial wording, untouched issue templates) and a suggested lane, without executing or echoing contributor text. `.github/TRIAGE_POLICY.md` sets the pipeline from snapshot to draft PR on `dev`, the documentation update every PR carries, release prep (CHANGELOG version entry, version lines, the `dev → main` PR, with the tag left to `release.yml`), what runs without the maintainer and what waits for a per-batch go-ahead, and runs contributor code only in a network-less namespace, because every process in the cloud container inherits the session's GitHub access.
+- **medical-device-software plugin: IEC 62304 and IEC 81001-5-1** (`ra-qm-team/medical-device-software`, also
+  bundled in ra-qm-skills). Four deterministic stdlib scripts: `software_safety_classifier.py` (IEC 62304 4.3 class
+  per system and item with the Amendment 1 external-control path and segregation, plus the FDA Basic/Enhanced
+  documentation level, which is assessed before risk controls, and the FD&C Act 524B cyber-device test);
+  `lifecycle_gap_check.py` (every 62304 activity by class, clause 4.4 legacy software, and IEC 81001-5-1 activities
+  with `--security`; unassessed is not MET); `soup_register_check.py` (8.1.2, 5.3.3/5.3.4, 7.1.3, end of support,
+  the 81001-5-1 risk-transfer category as clarified by ISH1:2025, and a CycloneDX/SPDX SBOM cross-check for
+  524B(b)(3)); `trace_matrix_check.py` (requirements to tests, risk controls to hazards and verification, release
+  state). Ships the cs-device-software-lead agent, `/cs-medical-device-software` and `/cs-soup-review`, and four
+  references that label every claim as checked against the primary text, agreed by secondary sources (the
+  paywalled 62304 class table), or unverified (EU harmonisation of EN 62304 and EN IEC 81001-5-1 under the MDR).
+
+### Fixed
+
+- **regulatory-affairs-head** IEC 62304 table no longer marks integration testing required for class A or calls
+  IEC 62304 harmonised under the MDR; **fda-consultant-specialist** names the Basic/Enhanced documentation level
+  that replaced the level of concern in June 2023. ra-qm-skills 2.14.12.
+
+## [2.14.10] - 2026-11-10 — EU AI Act Article 43(1) correction
+
+No new skills and no renames, so nothing needs a reinstall. One compliance fix from the community: the EU AI Act
+skills described the wrong conformity route for biometric systems. Six plugins whose files changed are bumped to
+2.14.10; plugins above that from earlier releases keep their versions (gate G11).
+
+### Fixed
+
+- **EU AI Act Article 43(1) conformity route for biometrics** (#1121, thanks @Johnbjoseph-cybersec). The
+  eu-ai-act-specialist skill, its `conformity_assessment_planner.py`, compliance-os `ai-act-readiness` and the
+  chief-ai-officer-advisor reference said Annex III point 1 (biometrics) always needs a notified body. Under
+  Article 43(1) the provider chooses Annex VI or Annex VII when harmonised standards or common specifications are
+  applied in full, and Annex VII is mandatory only when they do not exist, were not applied or only partly
+  applied, or a standard was published with a restriction. The planner now returns `A_or_H` / `provider_choice`
+  for that case, and no longer offers a notified body for Annex III points 2-8, which Article 43(2) limits to
+  internal control.
+
+## [2.14.9] - 2026-11-05 — a docs site that cannot drift, and CI that tests every harness
+
+No new skills. The docs site now builds every count, list and install line from the tree, so it cannot fall
+behind the repo again; CI now installs the library into the real Codex, Gemini CLI, Hermes and Vibe CLIs and
+measures whether a re-described skill still loads; and VERIFIED.md lists the 152 skills measured to load on
+plain-language prompts. No renames, so nothing needs a reinstall. Plugins whose files changed are bumped;
+plugins changed more than once on dev sit above 2.14.9 (gate G11), up to `engineering-advanced-skills` at 2.14.17.
+
+### Added
+
+- **Docs site generated from the tree** (#1114). A MkDocs hook (`scripts/docs_hooks.py`) runs the page
+  generator at build time, builds the Skills, Agents and Commands navigation from what it generated, and fills
+  every count, the plugin table and a new What's New page (the last five CHANGELOG releases). The site had
+  drifted to 345 skills and 80 plugins against 411 and 110, with about 150 pages missing from the navigation and
+  32 pages whose install commands named plugins that do not exist. Generated pages are no longer committed; 42
+  redirects keep old URLs working. New Hermes and Vibe guides and a harness support matrix. The Pages build runs
+  `--strict`, and gate G14 (`scripts/check_docs_site.py`) fails CI on a hard-coded counter, an unknown install
+  target or a page missing from the navigation.
+- **Docs site navigation, search and sharing** (#1115). Twelve top tabs reduced to six (Home, Skills, Plugins,
+  Agents, Commands, Other Tools); each domain page opens with up to three "Start here" picks and shows one card
+  per plugin group, so plugin-packaged skills are no longer missing from the grid. Search ranks skill pages
+  above the agent and command pages that wrap them. Social cards on the Pages build (with a fallback build
+  without them). `docs-preview.yml` builds docs PRs the way Pages does; `traffic-snapshot.yml` keeps GitHub's
+  14-day traffic data on a `metrics` branch once a `TRAFFIC_TOKEN` secret exists.
+- **Trigger-rate gate on PRs** (#1109, #1112). A PR that adds a skill or changes a skill's name or description
+  runs `scripts/evals/trigger_gate.py` on held-out prompts, base and head description in the same job. It fails
+  on a drop of more than 25 points, a new skill under 50%, any near-miss fire, or a skill it could not measure
+  (an expired token no longer passes silently; the job summary names the cause). Body-only edits make no model
+  call, fork PRs are skipped, and the `trigger-gate-override` label accepts a reviewed failure.
+- **VERIFIED.md: the skills that load when you ask in plain words** (#1116). 152 of the 389 skills tested loaded on every
+  plain-language test prompt and stayed quiet on the near miss. `scripts/build_verified_tier.py` builds the page
+  from `audit/verified-tier/trigger_results.json` (the latest measurement of each skill's live description), and
+  gate G15 fails when the page is stale or lists a skill that no longer exists.
+- **Hero repos** (#1116). `heroes/heroes.json` names standalone plugins that also ship as their own repository, each with a
+  one-line promise: `agent-run-forensics`, `human-gate` and `skill-retro`. `scripts/export_hero.py` generates the
+  repo tree (marketplace.json for `/plugin marketplace add <owner>/<repo>`, a README with both install paths and
+  the trigger result, a link back here), and `hero-sync.yml` pushes it on every change to main. This repo stays the
+  source of truth. The workflow does nothing until a `HERO_SYNC_TOKEN` secret and the target repos exist.
+- **Release notes thank community contributors by GitHub handle**, taken from the commits between the previous
+  tag and the release.
+
+- **Codex, Gemini CLI, Hermes and Mistral Vibe are checked in CI** (#1110). Gate G13
+  (`scripts/check_harness_mirrors.py`) regenerates the `.codex/`, `.gemini/`, `.vibe/` and `.hermes/` mirrors
+  from scratch on every PR and fails on any difference; `--fix` rewrites them. The new `harness-compat.yml`
+  workflow installs each real, open-source CLI (pinned on PRs, latest every Monday), runs the documented install
+  path into an empty HOME and fails unless the harness itself lists every installed skill
+  (`scripts/check_harness_installs.py`). No model is called and no API key is used.
+
+### Changed
+
+- **README first screen rewritten** (#1116). One sentence on what the library is and that its skills are tested, one
+  install command for Claude Code and one for other agents, a pick-your-role table and six verified starting
+  skills. The Claude Code install now comes before Gemini CLI, and stale counts (580 tools, 25 advanced skills,
+  346 Cursor rules) are gone.
+- **Second pass on the 48 skills that still never auto-triggered** (#1111). On a fresh blind prompt set (generated from
+  the old descriptions before any rewrite), 2 runs per prompt, rewriting 43 of them raised exact fires from 23/172
+  to 50/172 with zero near-miss fires. Only the 14 rewrites that improved were kept (ceo-advisor, cfo-advisor,
+  ai-act-readiness, senior-architect, senior-data-engineer, caveman, karpathy-coder, ci-cd-pipeline-builder,
+  migration-architect, pr-review-expert, sql-database-assistant, statistical-analyst, universal-scraping-architect,
+  social-media-analyzer); the rest keep their old text.
+- **Four router skills are now command-only** (`disable-model-invocation: true`): `c-level-skills`,
+  `engineering-advanced-skills`, `ra-qm-skills` and the `self-improving-agent` umbrella. They never fired, and
+  Claude Code already picks among their sibling skills itself; they stay available as slash commands, so nothing
+  breaks and no reinstall is needed.
+
+- `ai-decision-authority` provenance names no former employer (community, @kubersharmax, #1113;
+  `marketing-skills` 2.14.10).
+
+### Fixed
+
+- **Six skills never loaded in Codex** (aeo, deepread, hivemind, loop-library, swedish-mentor, youtube-full).
+  Codex skips a skill folder that holds a `.claude-plugin/` directory, which single-skill plugins keep next to
+  `SKILL.md`. `codex-install.sh` and `codex-install.bat` now drop that folder from the installed copy.
+- **Eight Gemini CLI entries were invisible** (chaos-experiment, flag-cleanup, operator-audit, slo-design and the
+  four `cs-*-review`/`cs-engineer-grill` commands). Gemini skips a SKILL.md without a frontmatter `name:`; the
+  command files now carry one, matching their file names, so Claude Code is unaffected.
+- Vibe and Hermes mirror links for agent-regression-evals, coding-agent-rollout and month-end-close pointed at
+  the standalone copy instead of the bundle copy a fresh sync picks (same content).
+- `generate_trigger_cases.py` now accepts a near-miss prompt the model wraps in a list, instead of writing a case
+  that crashes `run_evals.py`.
+
+## [2.14.8] - 2026-11-03 — skills that load when you ask for them
+
+No new skills. This release is about the ones you already have: 111 skills whose descriptions never made Claude
+Code load them now say what job they do in the words people type, and three oversized SKILL.md files load about
+40% fewer tokens. No renames, so nothing needs a reinstall. Every plugin whose files changed is bumped (31
+plugins); plugins changed more than once on dev sit above 2.14.8 (gate G11 requires each to exceed its dev
+version), up to `engineering-advanced-skills` at 2.14.16.
+
+### Changed
+
+- **Descriptions of 111 skills that never auto-triggered, rewritten** (#1106). A trigger sweep of all 389 unique
+  skills (two realistic prompts and one near miss each, Claude Code 2.1.317) found 112 that fired on neither
+  prompt. Their descriptions now lead with the job in user words and name the situations that should load the
+  skill ("Use whenever the user ..."); script names were dropped so each stays within its old length. On
+  held-out prompts written from the old descriptions, fires went from 57/222 to 85/222 (26% to 38%) with zero
+  false fires before and after, and skills that never fired dropped from 63 to 48. `reflect` is unchanged: its
+  rewrite measured worse. The listing the marketplace adds shrank slightly (98,545 to 97,572 characters) and
+  the G12 baseline was ratcheted down to match. `scripts/evals/run_evals.py` gains `--trigger-only` for sweeps.
+
+- **Three oversized SKILL.md files split into references** (community, @gabrielhavezane-ops, #1101, #1102, #1098).
+  Each body was over Anthropic's 500-line SKILL.md guidance and now loads about 40% fewer tokens; the moved
+  material lives in the skill's `references/` and is linked from the section it left. Workflows, scripts and
+  frontmatter are unchanged.
+  - **senior-frontend** (`engineering-skills` 2.14.8): 572 to about 290 lines. React patterns, Next.js
+    examples, accessibility, testing and quick reference moved to the three existing references.
+  - **senior-secops** (`engineering-skills` 2.14.8): 505 to 276 lines. Workflows 3 and 4, the secure coding
+    checklist, framework summaries, secret scanning and supply chain guidance moved to the existing references.
+  - **copy-editing** (`marketing-skills` 2.14.8): 508 to 240 lines. The full seven-sweep process and checklist
+    moved to the new `references/sweeps-detail.md` (references 916 to 917).
+
+## [2.14.7] - 2026-11-03 — i18n-localization and two built-in name clashes fixed
+
+One new skill requested by the community (#849), and two renames so our names no longer hide Claude Code
+built-ins. **If you installed `deep-research`, reinstall it under its new name** (see Upgrade note). Every plugin
+whose files changed is bumped; plugins changed more than once on dev sit above 2.14.7 (gate G11 requires each
+to exceed its dev version), up to `engineering-advanced-skills` at 2.14.15.
+
+### Upgrade note
+
+- `deep-research` is now `meta-research`. Existing installs show "not found in marketplace" and do not update.
+  Run `/plugin uninstall deep-research@claude-code-skills`, then `/plugin install meta-research@claude-code-skills`.
+  The agent is `cs-meta-research` and the command is `/cs-meta-research`.
+
+### Added
+
+- **i18n-localization** (engineering, standalone plugin 2.14.7, bundled in `engineering-advanced-skills` 2.14.15),
+  requested in #849. Three stdlib scripts with blocking exit codes: `locale_sync.py` checks translation files
+  (JSON/ARB, i18next or ICU, `.properties`, Apple `.strings`, Android XML, gettext `.po`) for missing or empty keys,
+  changed placeholders, ICU syntax, `zero` vs `=0`, and plural categories against the embedded CLDR 49 table;
+  `hardcoded_strings.py` finds UI text that bypasses `t()` in React/Vue/Svelte/HTML; `pseudo_localize.py` builds
+  `en-XA`/`ar-XB` pseudo-locales. Agent `cs-i18n-engineer`, commands `/cs-i18n-check` and `/cs-pseudo-locale`,
+  three references (7-8 sources each) and a CI job example. Eval (3 runs per arm, 8 planted defects): same
+  defects found with and without the skill (24/24), at 43% lower cost and 26% less time with it; the value is a
+  repeatable CI gate, not a quality lift.
+
+### Changed
+
+- **`deep-research` renamed to `meta-research` (reinstall required).** Claude Code 2.1.316 bundles a
+  `deep-research` skill (its fan-out web research workflow), and our plugin skill of the same name hid it.
+  The plugin, skill, agent (`cs-meta-research`) and command (`/cs-meta-research`) are renamed; the method and
+  the upstream catalog pointer are unchanged. Existing installs show "not found in marketplace": run
+  `/plugin uninstall deep-research@claude-code-skills`, then `/plugin install meta-research@claude-code-skills`.
+- **Maintainer command `/review` renamed to `/quality-gate`.** The project command in `.claude/commands/`
+  hid `/review`, which Claude Code uses as an alias of its built-in `/code-review`. The commands README
+  moved to `.claude/COMMANDS.md` (as a file in `.claude/commands/` it loaded as a `/README` command) and now
+  lists every command; `/git:*` commands are confirmed working on 2.1.316.
+- `check_skill_names.py` now reserves the bundled skills and workflows seen in Claude Code 2.1.316
+  (`deep-research`, `autopilot`, `bugfix`, `dashboard`, `docs`, `investigate`, `design`, `slides`, `dataviz`,
+  `team-onboarding`, `import`, `color`).
+
+### Fixed
+
+- Mistral Vibe and Hermes mirrors: the sync scripts now read folded YAML descriptions (`description: >`), so
+  `caveman` (both mirrors) and 13 more skills (Vibe) no longer show the description `>`. The Vibe mirror
+  also gains the seven skills added in v2.14.3 to v2.14.7 (access-lifecycle, agent-run-forensics,
+  cmmc-readiness, commit-craft, design-qa, i18n-localization, mcp-oauth-triage); Hermes gains i18n-localization.
+
+## [2.14.6] - 2026-11-02 — agent-run-forensics and a security audit that covers every skill
+
+One new skill, a security audit that now runs on every changed skill (all 409 pass `--strict`, with a real
+shell-injection bug and hardcoded fallback secrets fixed along the way), hardened workflows, and community
+fixes. Every plugin whose files changed is bumped; plugins changed more than once on dev sit above 2.14.6
+(gate G11 requires each to exceed its dev version), up to `engineering-advanced-skills` at 2.14.13.
+
+### CI
+
+- Workflows read PR titles, labels and other event text from environment variables instead of inline shell,
+  closing a PR-title shell-injection path in `claude-code-review.yml`. The Tessl step uses `tessl review run`
+  and stays skipped and non-blocking until a `TESSL_TOKEN` is configured.
+
+### Added
+
+- **agent-run-forensics** (`engineering/agent-run-forensics/` at 2.14.6, also bundled in `engineering-advanced-skills`
+  at 2.14.11). Answers questions about past agent runs from the transcript Claude Code or Codex already wrote,
+  not from memory; the idea came from PR #1016 and was rebuilt with no third-party tool. `trace_finder.py` finds
+  the run by repo, time window, touched file or command text. `trace_timeline.py` numbers every step with its
+  exit code, lists every file the run changed (SILENT when the agent never named it) and walks back from any
+  step with each causal edge labelled recorded or inferred by a named rule. `claim_checker.py` tests a summary's
+  claims against the run and returns STALE when tests passed before a later edit, PARTIAL when exit 0 belongs
+  to the last command of a pipe, and CONTRADICTED with the step. Secrets are always redacted. A fail-open
+  UserPromptSubmit hook names the session's transcript path when a prompt asks about past work. Ships
+  `cs-run-forensics`, `/cs-run-forensics`, `/cs-check-claims` and three cited references.
+
+### Changed
+
+- `CONVENTIONS.md` and `SKILL_PIPELINE.md`: the `plugin.json` example uses the canonical `"skills": ["./"]` array form (Claude Code 2.1.144+). Authoring metadata goes in `.claude-plugin/authoring-notes.json`, not `plugin.json`.
+- `SKILL_PIPELINE.md`: the per-commit rule updates a category's `README.md` and `CLAUDE.md` only when the catalog changes.
+- `CONVENTIONS.md` and `CLAUDE.md`: skill, domain and version counts match `derive_counters.py`; the frontmatter rule allows `license` and `metadata`, as `check_frontmatter.py` already does (docs from #1087, #1089 and #1088 by @gabrielhavezane-ops).
+
+### Fixed
+
+- `CONTRIBUTING.md`: documents how to run the repo counters test (`python3 -m unittest scripts/test_derive_counters.py`).
+- **universal-scraping-architect** (2.14.7): `firecrawl_example.py` and the Firecrawl guide use the firecrawl-py v2 API (`Firecrawl(...).scrape(...)`); the deprecated v1 `FirecrawlApp.scrape_url` call printed a `DeprecationWarning` on every run. The script still stops when `FIRECRAWL_API_KEY` is missing. Reported in #1072 by @JuampiHernandez.
+
+### Verified
+
+- `scripts/derive_counters.py --check` passes. `scripts/test_derive_counters.py` passes 7 of 7 tests.
+
+### Security
+
+- **The skill security audit now audits every changed skill.** Its detect step only found a `SKILL.md` one or
+  two folders deep, so plugin-layout skills and the `engineering/skills/` mirrors were skipped and the check
+  reported "skipped" instead of running; its path filter also missed eleven newer domains. It now walks up to
+  the nearest `SKILL.md`, has no path filter, and re-runs when a draft is marked ready. Before turning it on, all
+  409 skills were brought to a clean `--strict` audit: 36 skills failed with 95 findings.
+- Two findings were real and are fixed. `full-page-screenshot` built shell commands and a generated Python
+  script by pasting the output path into them, so a path containing a quote or `$(...)` ran as code; it now
+  uses argument arrays and JSON-quoted paths. `senior-fullstack` scaffolds fell back to the hardcoded secrets
+  `"change-me"` (Django `SECRET_KEY`, Express `JWT_SECRET`) and `"change-me-in-production"` (FastAPI) when the
+  variable was unset, so a deployment that forgot it signed sessions and tokens with a public key; they now
+  refuse to start without it. The same scaffolder crashed on every template (`str / str`), also fixed.
+- The rest were false positives (advice text, detection rules, test fixtures, install hints, URL fetches the
+  user asks for, guarded deletes) and carry `# noqa: SEC-AUDITOR (reason)`. The auditor gained an
+  `auditor:ignore-start` / `auditor:ignore-end` block for text inside template strings, where a trailing
+  comment would end up in the generated file.
+
+## [2.14.5] - 2026-10-31 — design-qa, commit-craft, skills that fit the listing budget
+
+Two new skills, an audit that cuts the marketplace's share of Claude Code's skill listing from 227k to 97k
+characters, two renames that stop our skills hiding Claude Code built-ins, and command references that
+actually run. Every plugin whose files changed is bumped; most land on 2.14.5, and those changed again after
+their first bump on dev sit above it (gate G11 requires each to exceed its dev version), up to
+`engineering-advanced-skills` at 2.14.10.
+
+### Migration
+
+- **skill-doctor → skill-retro (reinstall required).** The plugin name changed, so an existing install shows
+  as not found in the marketplace: `/plugin uninstall skill-doctor@claude-code-skills`, then
+  `/plugin install skill-retro@claude-code-skills`. Typing `/skill-doctor` now reaches Claude Code's built-in.
+- **autoresearch-agent `loop` → `ar-loop` (update only).** Run `/plugin update autoresearch-agent@claude-code-skills`
+  and type `/ar-loop` instead of `/loop`; the bare `/loop` is Claude Code's scheduler again.
+- **Command names in docs.** `/ar:*`, `/hub:*`, `/em:*` and `/docker:*`-style names never resolved; use the
+  names listed under Changed below.
+
+### Added
+
+- **design-qa** (`product-team/design-qa/`, also bundled in `product-skills`, both at 2.14.5). Built for the
+  request in issue #962: a gate that checks the rendered build before a screen is called done, independent of
+  any third-party product. Three stdlib scripts with blocking exit codes: `finish_lint.py` blocks on click
+  handlers that do nothing, dead links, placeholder copy and focus outlines removed without a replacement,
+  and warns on template defaults (the trait list from Anthropic's `frontend-design` skill) without ever
+  blocking on taste; `state_matrix_checker.py` derives the required loading, empty, error, busy, failure,
+  focus-visible and 320 px states from each surface's kind and treats an unlisted state as missing;
+  `rendered_audit.py` reads a browser snapshot and blocks on WCAG 2.2 AA failures in text contrast, focus
+  visibility, focus obscured, reflow, accessible names and target size (with the 2.5.8 spacing exception).
+  Snapshots come from a read-only collector (`assets/collect_snapshot.js`, DevTools console) or an optional
+  Playwright pass with real Tab keys (`assets/capture_snapshot.mjs`). Ships `cs-design-qa`,
+  `/cs-design-qa`, `/cs-ui-finish-lint`, three cited references and a finish sign-off. Source accessibility
+  stays with `a11y-audit`.
+- **commit-craft** (`engineering/commit-craft/`, also bundled in `engineering-advanced-skills`, both at 2.14.5).
+  Built for the gap named in issue #1004, independently and from public sources: turn a tangled working tree
+  into a reviewable commit series. `commit_planner.py` groups changes in build-safe order (manifest with
+  lockfile, pure moves, formatting, each module's change with its tests, docs, CI), holds back `.env`, keys and
+  tfstate, and flags files that mix formatting with real hunks and moves whose callers' import edits sit in
+  another commit. `secret_gate.py` scans the lines a commit adds (staged, or a range before push) and blocks on
+  provider tokens, high-entropy secrets, sensitive files and conflict markers, with redacted output and
+  waivers that need a reason. `message_linter.py` blocks vague subjects, missing why on large changes and
+  leftover fixup commits, and enforces Conventional Commits only where the repo already uses them. Ships
+  pre-commit, commit-msg and pre-push hooks, `cs-commit-craft`, `/cs-commit-craft`, `/cs-commit-check` and
+  three cited references.
+- **Gate G12** (`scripts/check_listing_budget.py`, blocking ratchet): no plugin may grow the characters it
+  adds to Claude Code's skill listing past its line in `scripts/listing_budget_baseline.txt`; a new plugin is
+  capped at 6,000.
+- **skill-retro** (formerly `skill-doctor`): `--sessions-dir` grades headless `claude -p` stream-json transcripts, such as eval runs.
+
+### Changed
+
+- **`skill-doctor` is now `skill-retro`.** Claude Code 2.1.314 ships a built-in `/skill-doctor` (which loaded
+  skills go unused and what they cost in context), and our plugin skill of the same name hid it. The plugin,
+  skill, agent and command are renamed (`skill-retro`, `cs-skill-retro`, `/cs-skill-retro`), across the
+  marketplace and the Codex, Gemini, Vibe and Hermes mirrors; behaviour is unchanged.
+  **Migration:** an existing install shows as not found in the marketplace. Reinstall it:
+  `/plugin uninstall skill-doctor@claude-code-skills`, then `/plugin install skill-retro@claude-code-skills`.
+- **autoresearch-agent's `loop` skill is now `ar-loop`**, matching `ar-run`, `ar-resume` and `ar-status`. The
+  bare name shadowed Claude Code's built-in `/loop` scheduler. Type `/ar-loop` (or
+  `/autoresearch-agent:ar-loop`) instead of `/loop` or `/autoresearch-agent:loop`; behaviour is unchanged.
+  **Migration:** run `/plugin update autoresearch-agent@claude-code-skills`; no reinstall is needed because
+  the plugin name is unchanged.
+- **Docs name commands that run.** Claude Code namespaces a plugin's commands by its `plugin.json` name, so
+  shorthand prefixes in our docs never resolved. autoresearch-agent's `/ar:` is now the bare `/ar-run`,
+  `/ar-loop`, `/ar-status`, `/ar-resume` and `/autoresearch-agent:setup`. agenthub's `/hub:` is now the bare
+  `/hub-init`, `/hub-run`, `/hub-status` and `/agenthub:spawn|eval|merge|board`. executive-mentor's `/em:` is
+  now `/executive-mentor:<name>`. docker-development, terraform-patterns and helm-chart-builder named
+  sub-commands such as `/docker:optimize` that never existed; they are skill arguments, so the docs now say
+  `/docker-development optimize`. The persona agents' fake `/pm:`, `/devops:`, `/finance:` and `/content:`
+  commands are now named workflows, and the Codex, Cursor and OpenClaw guides no longer list invented
+  commands. `check_command_refs.py` now fails on any `/<prefix>:<name>` whose prefix is not a plugin name.
+- **Skill descriptions rewritten so skills load when they should** (from the 2026-10-30 skill-doctor audit).
+  Claude Code lists every installed skill in about 30,000 characters and shortens descriptions past that;
+  the whole marketplace added 227,301 characters. 356 descriptions now open with the moment to load the
+  skill ("Use for/when/before ...") and name the scripts it runs, and 117 commands that only wrap a skill
+  are hidden from the model with `disable-model-invocation: true` (still typeable). The marketplace now adds
+  96,968 characters. On a 9-skill marketing sample, exact triggers went from 3/36 to 11/36 with no false
+  fires. Vendored descriptions (skillopt-sleep, loop-library) and Matt Pocock's verbatim ones are unchanged.
+- write-a-skill's checklist runner requires the trigger to lead the description and no longer treats
+  skill/tool or user/developer as synonyms. Repo audit: 64 PASS / 270 WARN / 70 FAIL.
+- 47 skills now list reference files and scripts their SKILL.md never named; terraform-patterns moves its
+  pattern catalog to `references/patterns-catalog.md` (SKILL.md 748 to 287 lines).
+- INSTALLATION.md explains the listing budget, `skillListingBudgetFraction` and installing only the bundles
+  you use.
+
+### Fixed
+
+- Seven links pointed outside their plugin and broke once installed: c-level-agents reaches executive-mentor
+  through a `vendor/` symlink, the others name the sibling plugin.
+
+## [2.14.4] - 2026-10-30 — CMMC Level 2 readiness, nightly skill evals
+
+One new skill and a nightly eval harness. The two plugins whose files changed move to 2.14.4:
+`cmmc-readiness` (new) and `ra-qm-skills`. The eval harness lives in `scripts/` and `.github/`, so no
+other plugin changes.
+
+### Added
+
+- **Nightly skill evals** (`scripts/evals/`, `.github/workflows/skill-evals.yml`). Runs the real Claude Code
+  CLI to check that each skill fires on realistic prompts and stays quiet on a near miss (trigger cases for
+  all 384 unique skills), and that answers with a skill pass more of a checklist than without it (6 behaviour
+  cases with a blind, schema-graded judge). A rotation of 15 skills a night, capped at $10, covers the library
+  every 26 nights; results accumulate on the `eval-results` branch. Authenticates with the subscription token
+  (`CLAUDE_CODE_OAUTH_TOKEN`) or an API key, and is off until the `SKILL_EVALS_ENABLED` variable is set.
+
+- **cmmc-readiness** (`ra-qm-team/cmmc-readiness/`, also bundled in `ra-qm-skills`, both at 2.14.4). Built for
+  the CMMC 2.0 Level 2 request in discussion #358, ahead of Phase 2 (Level 2 C3PAO as a condition of award,
+  from 10 November 2026). Three stdlib scripts with blocking exit codes: `sprs_score.py` scores all 110
+  NIST SP 800-171 Rev 2 requirements with the 32 CFR 170.24 weights (partial credit for MFA and non-FIPS
+  encryption, SSP unscored but mandatory), refuses a file that skips any requirement, and blocks on gaps that
+  can never go on a POA&M under 170.21; `poam_closeout.py` checks the POA&M against the score, owners and
+  the 180-day Conditional deadline and prints the expiry and annual affirmation dates; `scope_classifier.py`
+  sorts the asset inventory into the 170.19 categories and blocks on in-scope assets missing from the SSP or
+  inventory and on cloud providers holding CUI without FedRAMP Moderate or an equivalent body of evidence.
+  Ships `cs-cmmc-assessor`, `/cs-cmmc-readiness`, `/cs-sprs-score`, three references with confidence markers
+  and a readiness sign-off. Docs pages for `mcp-oauth-triage` (missed in 2.14.3) regenerated alongside.
+
+## [2.14.3] - 2026-10-29 — Access-review evidence, MCP OAuth triage, community fixes
+
+Two new skills and five fixes, three of them from community contributors. The six plugins whose
+files changed move to 2.14.3: `access-lifecycle` (new), `ra-qm-skills`, `engineering-advanced-skills`,
+`engineering-skills`, `pw` and `markdown-html-skills`.
+
+### Added
+
+- **access-lifecycle** (`ra-qm-team/access-lifecycle/`, also bundled in `ra-qm-skills`). Produces the
+  user-access-review evidence that `soc2-compliance` and the ISO 27001 skills only describe. Three stdlib
+  scripts with blocking exit codes: `access_diff.py` joins the HR roster to account exports and blocks on
+  leavers still enabled or used after their exit date, privileged orphans and ownerless privileged service
+  accounts; `access_review_campaign.py` blocks on accounts the campaign never covered, undecided lines,
+  self-review and revokes not removed inside the policy window, and flags rubber-stamping as a signal;
+  `control_evidence_mapper.py` maps findings to SOC 2, ISO 27001, NIST 800-53, PCI DSS, HIPAA and SOX IPE
+  controls with no PASS status. Inactivity and remediation periods are required flags, not defaults.
+  Ships `cs-access-reviewer`, `/cs-access-review`, `/cs-access-diff`, three references with confidence
+  markers and a sign-off template.
+
+- **mcp-oauth-triage** (`engineering/skills/mcp-oauth-triage/`, in `engineering-advanced-skills`; #1057,
+  contributed by @Ben-Home). Diagnoses an OAuth-backed MCP connector that authenticated before and now
+  returns 401s. `oauth_triage.py` classifies the fault from a token record and a connector log as envelope
+  mismatch, expiry semantics, rotation clobber, binding fault or poisoned negative cache, then names one next
+  probe; `run_fixtures.py` replays six shipped fixtures. Both take `--sample` for gate G9. Standard library only,
+  no network calls.
+
+### Fixed
+
+- **Install docs named plugins that do not exist** (#1058, #1061). README and INSTALLATION.md listed
+  `/plugin install` commands for eight names missing from `marketplace.json`; they now use real standalone
+  plugin names and explain that bundled skills come with their bundle.
+- **`convert.sh` dropped `assets/`** (#1059, contributed by @giriadityatheplankton). Converted integrations
+  now copy `assets/` like `scripts/`, `references/` and `templates/`, removing 47 dead links across 19 skills.
+- **md-slides failed to load in Antigravity** (#1060, contributed by @giriadityatheplankton). Its description
+  contained a literal `---`, which Antigravity's loader treats as the end of the frontmatter.
+- **epic-design pointed at asset files that never existed** (#1051). `SKILL.md` sent agents to
+  `assets/hero-section.html/.css/.js`; the pointers now name the references that hold that material
+  (`examples.md`, `depth-system.md`, `motion-system.md`).
+- **playwright-pro's router skill name did not match its folder** (#1051). `skills/pw/SKILL.md` now
+  declares `name: "pw"`, as the Agent Skills spec requires and as every mirror index already used.
+
+## [2.14.2] - 2026-10-26 — Skills that trigger, OWASP 2025, blocking JSON gate
+
+Remaining P2 items from the v2.14.0 real-state audit. The 43 plugins whose files changed move to 2.14.2.
+
+### Fixed
+
+- **Three popular skills never triggered.** `code-reviewer`, `self-improving-agent` and the
+  productivity `session-handoff` fired on 1 of 24 realistic prompts across two catalogue sizes
+  (2 runs each). Their descriptions now lead with what the user asks for rather than what the
+  skill contains. Same prompts after the change: 15 of 28, with handoff at 8 of 8 and no false
+  fires on near-miss prompts. The engineering `handoff` and `si:remember` descriptions got the
+  same treatment.
+- **OWASP Top 10 references moved from 2021 to 2025.** `security-pen-testing`'s scanner,
+  checklist generator, report example and checklist reference now use the
+  [OWASP Top 10:2025](https://owasp.org/Top10/2025/) codes. SSRF folds into A01, A03 becomes
+  Software Supply Chain Failures, and the new A10 Mishandling of Exceptional Conditions has its
+  own checks. `senior-secops`, `senior-backend` and `senior-security` references follow, and the
+  pen-testing checklist carries a 2021-to-2025 mapping table for existing reports.
+- **`datetime.utcnow()` removed** from 15 scripts and hooks (deprecated since Python 3.12). Output
+  is byte-for-byte the same; a blocking CI step keeps it out.
+- **Gate G9 is now blocking.** It was advisory with 240 JSON-advertising tools lacking
+  `--sample`. Those are frozen in `scripts/smoke_json_baseline.txt`; a new tool without `--sample`
+  fails, and so does a baseline line whose tool gained one, so the backlog only shrinks.
+- **Documentation drift.** INSTALLATION.md described a Vibe layout the installer no longer
+  writes, put the third-party `npx agent-skills-cli` first for Codex and said "205+ skills". 35
+  plugin READMEs had no install line (`claude plugin validate` advice). The agent-harness domain
+  manifests covered 18 of 20 domains and were stale; all 20 are regenerated. The docs site is
+  regenerated, including the renamed `session-handoff` page.
+
+## [2.14.1] - 2026-10-23 — Plugin updates reach existing installs, audit fixes
+
+Fixes from the v2.14.0 real-state audit (clean installs on six harnesses, mirror diffs, trigger
+and behaviour evals). Every plugin moves to version 2.14.1.
+
+> **Action needed: none for Claude Code.** Run `claude plugin update <plugin>@claude-code-skills`
+> (or `/plugin update`) and each plugin moves to 2.14.1. Before this release, updates reported
+> "already at the latest version" and kept old files. **productivity handoff users on Codex,
+> Gemini, Vibe or Hermes:** the skill is now `session-handoff`; reinstall it under the new name.
+
+### Fixed
+
+- **Plugin updates never reached existing installs.** Claude Code caches plugins by version, and
+  70 of 104 plugins changed between v2.12.0 and v2.14.0 without a bump. All 104 plugins are now
+  2.14.1. New blocking gate G11, `scripts/check_plugin_versions.py`, fails a PR that changes a
+  plugin's payload (symlinked vendor files included) without a higher version, or whose
+  marketplace.json and plugin.json versions disagree. `scripts/bump_plugin_versions.py` sets both.
+- **A full Codex install hid every skill description.** With all ~380 skills installed, Codex
+  drops descriptions to fit its prompt budget and cannot choose skills. `codex-install.sh` now
+  asks for `--category a,b`, `--skill` or an explicit `--all`, lists categories when run bare,
+  warns above ~100 installed skills, and stops skill-tester's sample fixture loading as a skill.
+- **Plugin commands and agents called scripts by repo-relative paths.** 343 invocations in 90
+  files across 36 plugins now use `${CLAUDE_PLUGIN_ROOT}/`; two cross-plugin calls go through
+  `vendor/` symlinks. `check_paths.py` (G1) now fails a plugin command or agent that runs a
+  script without `${CLAUDE_PLUGIN_ROOT}`.
+- **month-end-close `reconciliation_matcher.py`** treated "Opening balance" rows as transactions
+  (and advised booking them) and split a 7,980/7,890 transposition into two unrelated items.
+  Opening rows are now balances; a carried-in difference blocks sign-off (R5) and is never
+  booked; same-date digit transpositions pair into one correcting entry.
+- **coding-agent-rollout `settings_linter.py`** missed a password embedded in an `env` connection
+  URL and a shared file pre-approving a production MCP server. S11 now catches URL passwords;
+  new S13 warns on production servers in `enabledMcpjsonServers`.
+- **handoff name collision.** `productivity/handoff`'s skill is now `session-handoff`; Codex,
+  Gemini, Vibe and Hermes previously kept only one of the two `handoff` skills.
+- **Gemini mirror.** Each entry now links the whole skill folder (scripts and references
+  included), dual-published copies and same-named commands are listed once, and the mirror is
+  regenerated: `gemini skills list` conflicts 20 → 0. GEMINI.md documents folder trust.
+- **`convert.sh`** skipped the 7 plugins whose SKILL.md sits at the plugin root
+  (opencode 375 → 382 skills, and the same for Cursor, Windsurf, Kilo, Augment, Aider and
+  Antigravity).
+
+## [2.14.0] - 2026-10-21 — Audit skills, open-source YouTube and plugin-name fixes
+
+Three new plugins from the October audit's new-skill proposals, an open-source-first YouTube
+plugin, and plugin-name fixes that make `claude plugin validate .` pass on the whole marketplace.
+Totals: 398 skills, 766 Python tools, 877 references, 123 agents, 157 commands and 104
+marketplace plugins (derived by `scripts/derive_counters.py`).
+
+> **Action needed for `claude-coach` users (one time).** The plugin is now `power-user-coach`.
+> An existing install shows as "not found in marketplace" until you reinstall:
+> `/plugin uninstall claude-coach@claude-code-skills` then
+> `/plugin install power-user-coach@claude-code-skills`. The skill, commands and agent keep
+> their names.
+
+### Added — three skills from the October audit's new-skill proposals
+
+Each ships as its own marketplace plugin and is mirrored into its domain bundle, with a cs-*
+agent, two `/cs-*` commands, three or four stdlib scripts (all `--help` / `--sample` /
+`--output json`, typed exit codes), three references with per-claim confidence markers, and
+example assets. Each SKILL.md passes the write-a-skill 6-item checklist. Evaluated with
+skill-creator against a no-skill baseline on one realistic prompt per skill: 21/21 assertions
+with the skill, 17/21 without.
+
+- **engineering/agent-regression-evals** — proves an agent, prompt, model or tool change did not
+  make the agent worse. `trajectory_checker.py` grades tool-call paths (strict / unordered /
+  subset / superset; forbidden tools block in every mode); `flake_detector.py` classifies cases
+  from repeated trials, reports pass@k and pass^k with Wilson intervals, and warns when failures
+  cluster in late trials (shared state between trials); `regression_gate.py` averages trials per
+  case, then blocks on a paired CI below zero, a one-sided McNemar result, a critical-case
+  regression, a dropped case, or a quarantine entry without owner and expiry.
+- **engineering/coding-agent-rollout** — for rolling Claude Code out to a team.
+  `settings_linter.py` checks shared, local, user and managed settings against the documented
+  precedence and permission rules (dead `bypassPermissions` in project files, ignored `mcp__*`
+  allows, literal credentials, missing secret denies); `mcp_plugin_inventory.py` lists every MCP
+  server, plugin and marketplace against an approved list and blocks credentials in env,
+  headers, args or URLs; `claude_md_layering_audit.py` resolves CLAUDE.md layers and `@imports`
+  and finds contradictions and token-budget overruns; `adoption_tracker.py` turns local session
+  files into counts only, never transcripts.
+- **finance/month-end-close** — runs the accounting close. `close_calendar_planner.py` orders
+  tasks by dependency, finds the critical path, maps WD+n deadlines to dates and blocks on
+  missing owners or self-reviewed key controls; `reconciliation_matcher.py` matches GL to bank or
+  sub-ledger, builds the proof, ages open items and names likely causes of an unexplained
+  difference (carried-in opening balance, transposition, missed or doubled posting);
+  `flux_analyzer.py` applies the entity's own threshold rule and refuses boilerplate,
+  unquantified or self-reviewed explanations. Control expectations cite COSO 2013 and PCAOB
+  AS 2201, AS 2305 and SAPA 11.
+
+**Counters:** skills 392 → 398 (3 skills, each standalone and bundled); tools 746 → 766;
+references 859 → 877; agents 120 → 123; commands 151 → 157; plugins 101 → 104 (verified via
+`scripts/derive_counters.py --check`).
+
+### Changed
+
+- **`youtube-full` is open-source first.** Every operation (transcripts, search, channel and
+  playlist listing, upload monitoring, handle resolution) now runs on `yt-dlp`,
+  `youtube-transcript-api` and YouTube's public RSS feeds, with no account or API key. The
+  commercial TranscriptAPI backend is now an optional fallback that the agent mentions only
+  when the open-source path is blocked and the user asks, with a note on what data it sends.
+  The sign-up prompt and the `User-Agent: ClaudeCode/1.0` header are removed.
+
+### Fixed
+
+- **`claude-coach` plugin renamed to `power-user-coach`.** Claude Code reserves plugin names
+  starting with `claude-`, so `claude plugin validate .` failed on the whole marketplace. The
+  skill, the `/claude-coach` and `/cs-claude-coach` commands and the `cs-claude-coach` agent keep
+  their names; only the plugin name changes. Existing installs need one reinstall:
+  `/plugin uninstall claude-coach@claude-code-skills` then
+  `/plugin install power-user-coach@claude-code-skills`.
+- **Plugin names match their install names.** Four plugins installed under one name and
+  registered commands under another (`capture-skill` / `capture`, `email-pair` / `email`,
+  `reflect-skill` / `reflect`, `research-orchestrator` / `research`). Their `plugin.json`
+  names now match the marketplace names, so existing installs keep working (Claude Code keys
+  installs on the marketplace name) and only the `/<plugin>:<command>` form changes; the bare
+  `/cs-capture`, `/cs-inbox-setup`, `/cs-inbox-triage`, `/cs-reflect` and `/cs-research`
+  commands are unchanged. `self-improving-agent` keeps its `/si:*` namespace as a documented
+  exception. `check_plugin_json.py --all` now fails on any undocumented mismatch.
+- **Vibe and Hermes mirrors refreshed.** `.vibe/` and `.hermes/` now carry all 379 skills:
+  the six merged since the last sync, the 22 `c-level-agents` skills under their own domain
+  (they were stale links under `c-level-advisor/`, outside the index), and `loop-library`.
+  The sync scripts now include those two domains, find a `SKILL.md` at the domain root, and
+  list a bundle copy and its standalone-plugin twin once instead of twice.
+
+## [2.13.0] - 2026-10-21 — October triage and quality-audit release
+
+First release since v2.12.0. It clears the community backlog that built up over the summer,
+fixes every user-facing defect the October quality audit found, and adds six skills and two
+plugins. Totals: 392 skills, 746 Python tools, 859 references, 120 agents, 151 commands and
+101 marketplace plugins (derived by `scripts/derive_counters.py`).
+
+### Fixed — quality-audit sweep (#1039)
+
+- **Command names that run.** Claude Code runs a plugin command as `/<plugin>:<name>` or as a
+  bare `/<name>`, never as `/cs:<name>`. Every `/cs:<name>` reference in docs, skill
+  descriptions and hook messages now uses a form that resolves (`/cs-<name>`, or the fully
+  qualified `/c-level-agents:decide` style for generic names). The new blocking gate
+  `scripts/check_command_refs.py` keeps it that way. Entries below keep the old spelling as
+  history.
+- **c-level-agents and compliance-os work when installed on their own.** Their agents called
+  scripts through `../../` paths outside the plugin, which a marketplace install does not
+  copy. Each plugin now carries a `vendor/` of relative symlinks, referenced through
+  `${CLAUDE_PLUGIN_ROOT}`.
+- **Orphan skills are installable.** `loop-library` has its own plugin; `boost-asio-pro`,
+  `minimalist` and `strict-api` join the `engineering-advanced-skills` bundle.
+- **Regulatory dates.** EU AI Act timelines follow Regulation (EU) 2026/1744, and the
+  Colorado references cite SB 26-189 instead of the unrelated SB 21-169.
+- **Hooks and scripts.** Two plugin hooks now read stdin JSON and reach Claude; agent-launcher
+  `--sample` honours `--json`; agenthub asks before it merges.
+- **No third-party plugin for cloners.** `.claude/settings.json` no longer enables an
+  external marketplace plugin for everyone who clones the repo.
+
+### Added — community contributions (merged with maintainer fixes)
+
+- **`engineering/hivemind` is an opt-in plugin.** It orchestrates opencode workers on free or
+  local open models and ships outside every bundle. Its README and SKILL.md say plainly that
+  the default model sends code to opencode's hosted service, and how to keep code local with
+  `--model`. It gains a claim-verification stage (`oc-verify.mjs`, plus a verifier persona
+  that runs on a different model) and a `--json` contract with one corrective retry (from
+  #1003 by @Hanishchow; the proposed OpenRouter provider was left out pending a security
+  review).
+- **`research-ops/interview-mapper`**: transcript coding, quote verification against the
+  source, a reliability council and insight synthesis (#992 by @Socialpranker, closes #910).
+- **`finance/passive-deal-screener`**: screens private deals from the passive LP side with
+  fee-drag and benchmark tools. Every verdict carries a not-investment-advice line (#1026 by
+  @dhoovDB).
+- **`engineering-team/red-green-proof`**: prove a bug with a test that fails, passes on the
+  fix, and fails again when the fix is reverted (#1000 by @rooagidev).
+- **`marketing-skill/ai-decision-authority`**: sorts marketing and GTM decisions into
+  AI-primary, collaborative and human-primary zones by stakes and reversibility (#998 by
+  @kubersharmax).
+
+### Fixed — October 2026 issue-triage sweep
+
+- **Codex-valid SKILL.md frontmatter (#1027).** 77 skills carried `version` / `author` /
+  `tags` / `compatible_tools` (and similar) at the top level and 36 descriptions contained
+  `<` or `>`; Codex's skill validator rejects both. The keys now sit under `metadata:` and the
+  descriptions are reworded (`/cs:x <arg>` is now `/cs:x [arg]`). `check_frontmatter.py`
+  fails a SKILL.md that reintroduces either.
+- **Agent frontmatter (from #939, by @benrfairless).** Dead `skills:` values removed from 86
+  agents rather than switched on as preloads, and the ignored `context: fork` removed from 11.
+  The agent template no longer suggests `skills:`, and the gate rejects both keys on agents.
+- **Name collisions.** The two `handoff` plugins are now `handoff-engineering` and
+  `handoff-productivity`. agenthub's and autoresearch-agent's `run` skills are now `hub-run`
+  (`/hub:hub-run`) and `ar-run` (`/ar:ar-run`); `run` joins the reserved-name gate.
+- **Mirrors.** `loop-library` is in the Codex index (#1019); the Gemini sync no longer ships
+  `agents/personas/README.md` and `TEMPLATE.md` as skills (#1001).
+- **focused-fix (#1034)** no longer requires the unbundled `superpowers` plugin.
+
+### Added — engineering/spinning-up-deep-rl: the first book compiled by book-to-skill
+
+Knowledge-base plugin compiled end-to-end by `engineering/book-to-skill` from OpenAI's
+[Spinning Up in Deep RL](https://spinningup.openai.com/) (MIT, Copyright (c) 2018 OpenAI;
+primarily developed by Joshua Achiam). 20 chapters, a glossary, a patterns file and a
+decision cheatsheet, behind a 2,101-token resident core.
+
+- **The full pipeline, not a hand-write.** `openai/spinningup` cloned, its `docs/`
+  reStructuredText tree (38 files, ~37k words, ~49K tokens) run through
+  `extract_document.py --mode technical` → analysis → chapter files → supporting files →
+  master `SKILL.md` → `book_skill_validator.py` → `skill_plugin_emitter.py`. The validator
+  passes clean in `--strict` mode and every file is inside budget.
+- **Rights basis `open-license`, stated and honoured.** The emitter's Step-11 gate refuses a
+  shareable package without one. MIT permits derivative distribution; upstream's notice is
+  reproduced in full in the plugin's `LICENSE` beside this package's own, and `README.md`
+  names the source, the author and the source's frozen version.
+- **Structure follows the source's own `toctree`.** User documentation (ch01-06), Introduction
+  to RL Parts 1-3 (ch07-09), resources — the researcher essay, key papers, exercises,
+  benchmarks (ch10-13), one chapter per algorithm in lineage order (ch14-19: VPG → TRPO → PPO,
+  DDPG → TD3 → SAC), and the logger / MPI / ExperimentGrid utilities (ch20).
+- **The cheatsheet carries the judgment a glossary cannot** — the under-5-minute debug
+  turnaround, the 3-seed minimum (10+ to be thorough), family-specific benchmark network
+  defaults, and Spinning Up's own parity disclosure: DDPG/TD3/SAC are research-grade,
+  VPG/TRPO/PPO are not, and the docs say to use OpenAI Baselines for those.
+- **Counters:** skills 387 → 388; agents 117 → 118; commands 149 → 150; plugins 98 → 99.
+  Tools and references unchanged by this plugin — a compiled knowledge base ships notes, not
+  scripts. (These sit on top of `deep-learning-book`, which merged into `dev` first; the
+  derived totals are 388 skills / 727 tools / 842 references / 118 agents / 150 commands /
+  99 plugins.)
+
+### Fixed — book-to-skill's plugin emitter produced manifests this repo's CI rejects
+
+`skill_plugin_emitter.py` wrote its whole `source` provenance block into `plugin.json`, with an
+inline comment asserting that `source` and `attribution` were approved extension fields. That had
+been true and no longer was: Claude Code rejects an entire manifest on any unrecognized key
+(issue #954), and `scripts/check_plugin_json.py` hard-fails such a manifest, pointing at
+`.claude-plugin/authoring-notes.json` instead. Every package the emitter produced therefore failed
+the blocking CI gate the moment it was committed — a defect at the very last step of the pipeline,
+which is why it had gone unnoticed. `_plugin_manifest()` now emits spec fields only and a new
+`_authoring_notes()` writes the sidecar. Recorded as deviation 26 in
+`engineering/book-to-skill/README.md`. The printed `marketplace.json` snippet is unchanged: `source`
+is a valid key there, which is how it leaked into the manifest originally.
+
+### Added — engineering/deep-learning-book: a companion to the free Deep Learning textbook
+
+New `engineering/deep-learning-book/` plugin: a study companion for *Deep Learning* by
+Goodfellow, Bengio & Courville (MIT Press, 2016), free to read at deeplearningbook.org.
+One skill, 4 stdlib-only tools, 4 references, 3 assets, 1 agent, 3 commands.
+
+- **Companion, not compilation — and that was the design decision.** `book-to-skill`'s
+  rights gate refuses a `shareable` package without `public-domain` / `open-license` /
+  `internal-docs` / `author-permission`, none of which applies to an MIT Press title whose
+  own site states the HTML-only format exists as a friction against copying under the
+  authors' contract; its rights reference lists publishing a compiled skill of a copyrighted
+  book to a public marketplace under **Do not**, and its hard rule 1 forbids scraping a book
+  from the web. So nothing here reproduces the book: every chapter file is original
+  synthesis linking to the official free chapter, and the organizing structure is the
+  published table of contents. **The rule this sets:** convert a copyrighted work into a
+  companion that indexes and updates the source, never a compilation that reproduces it.
+- **The compiled-skill shape, validated by the compiler's own gate.** Master `SKILL.md`
+  (~2.0k tokens, chapter index + topic index), `chapters/ch01..ch20`, `glossary.md`,
+  `patterns.md`, `cheatsheet.md` — passes `book_skill_validator.py` clean with every file
+  inside `token_budget_estimator.py`'s caps.
+- **The 2016→2026 delta layer is the differentiator.** A compilation freezes a source at its
+  publication date; this one dates it. Every chapter carries "What changed after 2016", and
+  `references/book_to_2026_delta.md` gives five corrections with primary citations and
+  per-claim confidence: double descent qualifying Ch 5's U-curve, AdamW splitting weight
+  decay from L2, transformers displacing Ch 10's recurrence, diffusion growing out of Ch 18's
+  score matching, and self-supervised learning vindicating Ch 15 while replacing its methods.
+  Two contested claims are marked contested rather than propagated; two named as folklore.
+  Stated rule: **the conflict is almost always in the recommendation, not the analysis.**
+- **Four tools, each with a real refusal.** `reading_path_planner.py` (prerequisite closure
+  over the book's actual dependency graph, priced in weeks; exit 3 naming what covers an
+  out-of-scope goal, exit 4 with forcing questions when unroutable; ties break on keyword
+  specificity, not alphabetically); `training_diagnostics.py` (Ch 11's rules in priority
+  order, so a NaN is never reported as overfitting; exit 4 rather than diagnosing with no
+  instruments); `capacity_planner.py` (regularization ladder in cost order with "shrink the
+  model" ranked **last** in the overparameterized regime; exit 4 on a val-below-train split);
+  `model_arithmetic.py` (params/FLOPs/activation memory for conv, linear, position-wise
+  linear, MHA and LSTM/GRU stacks; exit 5 naming the layer whose shapes do not connect).
+- `cs-deep-learning-tutor` agent; `/cs:deep-learning`, `/cs:dl-reading-path`,
+  `/cs:dl-diagnose`. **Counters:** skills 386 → 387; tools 723 → 727; refs 838 → 842;
+  agents 116 → 117; commands 146 → 149; plugins 97 → 98.
+
+### Added — marketing/linkedin: organic LinkedIn presence with the platform rules in code
+
+New `marketing/linkedin/` plugin, answering
+[discussion #934](https://github.com/alirezarezvani/claude-skills/discussions/934), which
+asked for a strategic assistant for growing a LinkedIn presence organically rather than a
+post generator. Six skills, 17 stdlib-only tools, 15 references, 2 agents, 8 commands.
+
+- **The design constraint is the differentiator.** The plugin holds no LinkedIn credentials,
+  makes no API calls, scrapes nothing, and sends nothing — automated posting, connecting,
+  commenting, and liking are prohibited by LinkedIn's User Agreement §8.2, and a restricted
+  account ends a compounding asset. `linkedin_policy_gate.py` runs before any drafting and
+  refuses seven classes of request (automation, scraping, engagement pods, bulk messaging,
+  fake identity, fabricated proof, named third-party automation platforms), each with the
+  policy anchor and a **compliant substitute** — the gate never just says no.
+- **`linkedin-skills`** (orchestrator, `context: fork`) — policy gate + deterministic
+  five-lane router (route 0 / ask 2 / no-signal 3) with cross-lane prerequisites.
+- **`linkedin-profile`** — headline scored on audience/outcome/proof/searchability/clarity
+  against the 220-char cap and the ~60-char front-load window; whole-profile audit across 14
+  weighted checks with fixes ranked by **points per hour** and a first-hour plan; About
+  builder that refuses a fold cutting mid-sentence or carrying no audience and no proof.
+- **`linkedin-strategy`** — positioning brief validator (six real objectives, an audience
+  specific enough to exclude someone, 2-4 proof-backed pillars, a **mandatory exclusion
+  list**); cadence planner that prices the week in minutes and returns a comment-only plan
+  below a 90-minute floor; newsletter gate on LinkedIn's published 150-follower evaluation
+  threshold plus six-month cadence cost, with a stop rule written before issue one.
+- **`linkedin-content`** — post linter across mechanics / hook / integrity / accessibility,
+  blocking on the 3,000-char cap, engagement bait, and **Unicode pseudo-bold** (screen
+  readers announce it as mathematical symbols; search does not index it as words); format
+  picker over nine native formats; repurpose splitter with a **content-hash reuse ledger**.
+- **`linkedin-engagement`** — comment roster capped at two appearances per account per week;
+  message builder that refuses a template without a person-specific line and refuses an ask
+  in a first-touch connection note; volume guard that refuses above 40 invitations a day as
+  an automation plan regardless of intent.
+- **`linkedin-analytics`** — median/MAD describer with Tukey bands (a mean describes a
+  distribution none of your posts belong to); four-gate permutation pattern miner with
+  **multiple-comparisons accounting** and mirrored-candidate de-duplication; experiment
+  planner that reports infeasibility rather than quietly shrinking the effect. Refuses to
+  conclude anything below 10 posts.
+- **Evidence discipline — two widely repeated claims corrected rather than propagated.**
+  (1) "A personalised connection note triples acceptance (~45% vs ~15%)" is not supported by
+  the largest samples, which show acceptance close to identical either way (~26.4%); what a
+  note moves is the **post-accept reply rate** (~5.4% → ~9.4%), which is why the builder
+  refuses an ask in a first-touch note. (2) The ~19% in-body link reach reduction has never
+  been confirmed by LinkedIn as a penalty and has a plausible dwell-time explanation, so it
+  is a warning rather than a blocking finding. Every reference carries per-claim confidence
+  levels (🟢 LinkedIn-official / 🟡 third-party study / 🔴 folklore).
+- All six SKILL.md files are a full **6/6 PASS** on the write-a-skill checklist. Every tool
+  supports `--help`, `--sample`, and `--output json` with typed exit codes.
+- **Counters:** skills 380 → 386; plugins 96 → 97; tools 706 → 723; references 823 → 838;
+  agents 114 → 116; commands 138 → 146 (verified via `scripts/derive_counters.py --check`).
+
+### Fixed
+
+- Synced three previously-merged skills (`engineering/agent-memory`, `engineering/hivemind`,
+  `engineering/skill-doctor`) into the `.hermes/` and `.vibe/` mirror trees, which had
+  drifted behind `.codex/` and `.gemini/`.
+
+## [2.12.0] - 2026-08-24 — consolidated release: 20 domains, 380 skills, full issue-triage sweep
+
+**First tagged release since v2.9.0.** Versions 2.10.0–2.11.2 were documented in
+CLAUDE.md/README at the time but never entered here, so the Release workflow never
+tagged them; this entry consolidates everything since the v2.9.0 tag — the
+previously documented v2.10.x/v2.11.x work plus all post-2.11.2 merges. Headline
+counters at this release: **380 skills · 96 marketplace plugins · 20 domains ·
+706 Python tools · 823 reference docs · 114 agents · 138 slash commands**
+(derived and gated by `scripts/derive_counters.py --check`).
+
+### Added — consolidated from the untagged v2.10.0–v2.11.2 releases
+
+- **markdown-html/** domain complete (v2.10.0–v2.10.3): orchestrator +
+  design-system foundation, then `md-document` (long-form), `md-review`
+  (2-col code review), `md-slides` (single-file deck with presenter mode).
+- **engineering/agent-harness** (v2.11.0): manifest builder + goal compiler +
+  loop controller turning any domain into a bounded, self-verifying agent loop;
+  agentic-readiness audit of both engineering folders.
+- **product-team + project-management as agent-harness domains** (v2.11.1):
+  fork-orchestrators, deterministic goal routers, Jira snapshot bridge with
+  Monte Carlo forecasting, delegation-governance loop gate, discovery cadence
+  tracker + OST linter; audit record `audit/pm-product-agentic-2026-07/`.
+- **engineering/skillopt-sleep** (v2.11.2): vendored microsoft/SkillOpt nightly
+  self-improvement engine with 23 documented hardening deviations.
+
+### Added — post-v2.11.2 merges in this release
+
+- **agent-launcher/** — 20th top-level domain: Claude Managed Agent launcher
+  (full detail in its section below).
+- **engineering/memory-engineering** — design/price/audit agent memory systems
+  (cost profiler, architecture picker, density auditor, forgetting-policy linter).
+- **engineering/agent-memory** — four-tier (L0–L3) promotion-gated memory ladder
+  over Claude Code hooks; nothing reaches a CLAUDE.md without a human adopt.
+- **engineering/human-gate**, **engineering/book-to-skill**,
+  **engineering/hivemind** (PR #979), **productivity/fable-goal**,
+  **productivity coverage expansion** (weekly-review, deep-work, meetings +
+  public audit `audit/productivity-2026-07/`),
+  **marketing local-seo-manager**, code-reviewer language expansion —
+  detailed sections below.
+- **c-level-agents/** promoted to its own top-level domain directory (issue #949).
+
+### Fixed — full reported-issue triage sweep (PRs #972, #973, #982)
+
+All 17 open issues driven to a final state; the 14 resolvable ones fixed and closed:
+
+- **#954** — 39 `plugin.json` manifests carried non-spec `source`/`attribution`
+  keys that made Claude Code reject the whole manifest (40% of the marketplace
+  uninstallable). Keys relocated to `.claude-plugin/authoring-notes.json`
+  sidecars; `check_plugin_json.py` now hard-fails any recurrence in CI.
+- **#949** — `c-level-skills` never loaded because `c-level-agents` was nested
+  inside its marketplace source; moved to a top-level directory.
+- **#885** — plugin skills shadowing built-in commands (`status`, `review`,
+  `init`, `resume`) renamed across four plugins (`memory-status`,
+  `pw-init`/`pw-review`, `hub-init`/`hub-status`, `ar-status`/`ar-resume`);
+  new blocking CI gate `scripts/check_skill_names.py` + rule in
+  SKILL-AUTHORING-STANDARD.md.
+- **#969** — `UnicodeEncodeError` on legacy Windows codepages: nine scripts now
+  reconfigure stdout/stderr to UTF-8; `PYTHONUTF8=1` documented.
+- **#968** — Windows symlink-checkout caveat documented (INSTALLATION.md
+  "Windows Notes" + README pointer).
+- **#933** — all dead links to the maintainer-local `megaprompts/` tree
+  (~75 files incl. the docs site) replaced with annotated plain text.
+- **#931** — DynamoDB on-demand pricing corrected to post-Nov-2024 rates.
+- **#924** — plugin hook commands quote `"${CLAUDE_PLUGIN_ROOT}"` (space-safe).
+- **#978** — playwright-pro's TestRail/BrowserStack MCP servers (which could
+  never start — dependencies never installed) are now a documented opt-in
+  instead of a permanent `Failed to connect` pair for every user.
+- **#977** — two agents shipping without YAML frontmatter, repaired via the
+  G10 frontmatter gate work (PR #936).
+- Spam/out-of-scope issues #925, #960, #923, #951 closed with rationale;
+  proposals #910, #952, #962 triaged with approval/scoping replies;
+  superseded PRs #932/#966 closed with credit.
+
+### CI
+
+- New blocking gates since v2.9.0: built-in-shadowing skill names (#885),
+  frontmatter YAML validation (G10), retired-model lint (G7), path linter G1
+  and script smoke G8 flipped blocking, plugin-manifest key rejection (#954),
+  marketplace description 1024-char cap (Copilot CLI, PR #964).
+
+The sections below — formerly stacked as `[Unreleased]` — are part of this release.
+
+### agent-launcher: session-goal domain plugin for Claude Managed Agents (PR #961, merged 2026-08-21)
+
+### Added — `agent-launcher/` (new top-level domain, 19th)
+
+Plugin re-implementation of Anthropic's
+[`launch-your-agent`](https://github.com/anthropics/launch-your-agent) reference
+skill (Apache-2.0; **independent, not a fork**) for building **Claude Managed
+Agents (CMA)** in the user's own Anthropic account. Organizing idea: **every
+session starts with a goal** (`./my-agent/goal.json`, surfaced by an opt-in
+`AGENT_LAUNCHER_SESSION=1` SessionStart hook and driven by `/cs:goal`);
+`loop_compiler.py` compiles that goal into a **bounded grade→iterate loop**
+(CMA `user.define_outcome` self-grading, `max_iterations` clamped 1..20 — never
+unbounded), a **recurring POSIX-cron scheduled-deployment loop** ("run without
+you", optionally self-grading each firing via a nested outcome), or a
+**single-pass interview→stage→launch workflow**.
+
+- **6 skills:** `agent-launcher-orchestrator` (`context: fork` goal router with
+  exit-code route/ask/refuse) + `interview` (six intake slots → build sheet with
+  primitives table + v1/v2 deferrals + eval plan) + `stage-launch` (validated
+  env/agent/session/kickoff payloads + resumable **BYOK curl** launch script
+  that reads `$ANTHROPIC_API_KEY` at runtime and never embeds it) +
+  `grade-iterate` (outcome/rubric + verdict reader + held-back eval scaffold
+  capped at the 25-thread ceiling) + `run-without-you` (5-field POSIX cron +
+  IANA tz + wall-clock-DST validation, deployment payload with test-run curl,
+  NEXT-DIRECTIONS writer) + `wrap-up` (primitives inventory + regenerated
+  single-file overview HTML + ranked next upgrades).
+- **18 stdlib-only deterministic scaffolder tools** (3 per skill; NO network/API
+  calls; all pass `--help` + `--sample`), **4 agents** (orchestrator +
+  interviewer + grader + deployer), **8 `/cs:*` commands** (launch, goal,
+  interview, stage-launch, grade, run-without-you, wrap-up,
+  grill-agent-launcher), **opt-in SessionStart/SessionEnd hooks** (exit 0 on any
+  error — can never break a session), **5 shared references**, **4 assets**
+  (build-sheet JSON schema + overview/NEXT-DIRECTIONS templates + example).
+- Validators enforce CMA limits (≤20 skills/session, ≤8 memory stores, depth-1
+  multiagent ≤20 roster / ≤25 threads, `max_iterations` ≤20, ≤20 creds/vault,
+  ≤1,000 deployments/org); `payload_validator.py` FAILs on any embedded API key.
+- **Verification:** independent 10-agent workflow re-checked every SPEC.md part
+  against disk — 9/9 PASS, zero differences from spec (delivery report kept in
+  maintainer-local `documentation/`, per the sprint-artifact convention; the
+  public build target is `agent-launcher/SPEC.md`). Full 4-phase pipeline
+  verified end-to-end; generated `launch.sh` passes `bash -n`.
+- **Counters** (at merge): skills 362 → 368, domains 18 → 19, tools 644 → 664,
+  refs 741 → 746, agents 102 → 106, commands 116 → 124, plugins 88 → 89
+  (derived via `scripts/derive_counters.py --check`).
+- Distinct from `engineering/agent-harness` (generic bounded loop over any repo
+  domain) and `engineering/write-a-skill` (authors Claude Code skills, not CMAs).
+
+### human-gate: batched human review as a verification artifact (this PR)
+
+### Audited — `petergyang/human-review`
+
+Public audit record at `audit/human-review-2026-08/AUDIT.md`. Upstream (npm
+`human-review@0.6.0`, MIT © Peter Yang) is a ~5,200 LOC Node application that opens
+an HTML/Markdown file or localhost page in the browser for direct editing and
+anchored comments, then ships the batch back to the agent as JSON. **Verified: its
+own test suite passes 90/90.** Security posture is better than most local-server
+tools — loopback-only bind, DNS-rebinding `Host` check, constant-time token compare,
+realpath-checked traversal guard, a deliberately inert Markdown renderer, and a
+45-minute idle self-shutdown.
+
+**Verdict: do not vendor, do adopt the pattern.** Node 20 + an npm runtime dependency
+fails the same stdlib-only test that kept the heavier `skillopt` package out in
+v2.11.2. Seven findings recorded, three material: **F1 (HIGH)** the skill instructs
+the agent to run unpinned `npx -y human-review`, so every invocation may fetch and
+execute a newly published version; **F2 (MED)** "do not end your turn" plus re-poll
+on timeout, with no headless guard and no retry cap — the AR5 loop-discipline gap
+`audit/engineering-agentic-2026-07/` already named as repo-wide; **F3 (MED)** only
+`/api/*` is token-gated, not `/artifact/<key>` or `/s/<id>`.
+
+Also worth stating plainly: despite the name, this is **not** a humanizer. It is
+human *approval*, not human *voice* — no overlap with `engineering/behuman` or
+`marketing-skill/content-humanizer`.
+
+### Added — `engineering/human-gate`
+
+Conceptual derivation (no upstream code copied), built to this repo's conventions:
+three stdlib-only Python scripts, no server, no socket, no network fetch.
+
+- **`review_page_builder.py`** — Markdown/HTML → single-file review page with every
+  block anchored (`data-hg="b7"`). **Zero network requests** — no CDN, no fonts, no
+  Prism; ~11 KB, opens over `file://`. Markdown is rendered by a stdlib subset parser
+  that escapes before applying inline markup and scheme-allowlists every href;
+  HTML input is re-emitted through `html.parser` with `<script>`/`<style>`/`<head>`
+  dropped and top-level block elements tagged. Review UI is vanilla JS with
+  localStorage persistence and an export that writes the sidecar.
+- **`feedback_parser.py`** — sidecar Markdown → `batch.v1` JSON. Severities
+  BLOCKER/MAJOR/MINOR/NIT (matching `markdown-html/md-review`, from Google's
+  code-review guidance) plus EDIT/NOTE/APPROVE. Verifies every quote against the real
+  file and reports mismatches rather than swallowing them. Strips HTML comments so an
+  example written inside one cannot parse as a real sign-off.
+- **`human_gate.py`** — `open`/`status`/`collect`/`close`/`reset` state machine with
+  atomic writes and `0700`/`0600` state permissions. Gate rules **G1–G7**: refuses to
+  close with no collected round, an open BLOCKER/MAJOR, an unnamed reviewer, a sidecar
+  changed after collection, an exhausted round cap (exit 5 = escalate, never pass), a
+  waiver without a recorded reason, or a round carrying unresolved integrity problems.
+  Waivers store both the reason and every refusal they overrode.
+
+**Four more fixes came out of a second PR review round**, each reproduced before fixing:
+**(a)** the HTML artifact path re-emitted attributes verbatim, so a reviewed draft containing
+`<img src=x onerror=...>`, `<a href="javascript:...">` or an `<iframe>` executed inside the
+review page — the Markdown path had `_safe_href` scheme-allowlisting all along and the HTML
+path had nothing. `sanitize_attrs()` now drops `on*`/`srcdoc`/`srcset`, runs every URL
+attribute through the same allowlist (control characters stripped first, so `java\tscript:`
+cannot smuggle a scheme), and `DROP_TAGS` removes `iframe`/`object`/`embed`/`base`. Legitimate
+`https:` links and relative images survive. **(b)** `verify_quotes()` compared a browser
+selection (rendered text) against raw markup, so quoting a sentence containing `**bold**` or a
+link failed — and since G7 made that blocking, it refused a legitimate close. It now matches
+against raw *or* a rendered-text projection, while a genuinely fabricated quote is still
+caught. **(c)** `state["waiver"]` was never cleared, so a clean unwaived round N+1 still
+printed round N's waiver reason — in a tool whose premise is an honest record, that is its own
+integrity bug. **(d)** `status` returned 4 for both "no sidecar yet" and "collected, blockers
+open"; the blocked case now returns 2, matching `close`, so an agent can branch on the exit
+code alone (0 clear · 2 blocked · 3 collect · 4 nothing yet).
+
+**A fifth round found two more.** `state_dir()` anchored gate state to `os.getcwd()` while
+keying it by the artifact's realpath, so an agent whose shell cwd drifted between turns
+silently started from empty state — `close` from a subdirectory reported G1 "nobody has
+looked at this" for a round that really was collected. It failed closed rather than falsely
+passing, but it lost real feedback; state now follows the artifact, the same way the sidecar
+and review page already do (`--state-dir` still wins). Separately, `build_page()` substituted
+`__CONTENT__` before `__TITLE__`/`__CONFIG__`, so reviewing a document that mentions those
+tokens — this skill's own docs, for instance — re-substituted inside the inserted body and
+injected the entire JSON config into the visible page. All three slots now fill in a single
+`re.sub` pass, and the Markdown `--sample` fixture carries the token text so the case is
+guarded. Minor: `--waive` with nothing to waive now says so instead of silently no-opping.
+
+**A fourth round found the gate itself was one flag away from opt-out.** `--waive` applied to
+whatever `gate_refusals()` returned — including **G1, "no review round has been collected"** —
+so an agent could close having had no review at all by supplying any reason string. That is the
+most tempting shortcut under time pressure and it defeats the skill's entire premise, so G1 is
+now **unwaivable**: a waiver accepts objections a reviewer raised, it cannot manufacture a
+review that never happened. Waiving a genuine objection still works. Same round: inline
+`style` joined `DROP_ATTRS` (a `background-image:url(https://…)` beacons the reviewer's IP on
+open with no script involved, breaking the stated no-network property — and the `<style>` tag
+was already dropped, so keeping the attribute was inconsistent too); Markdown `![alt](url)`
+now renders a real scheme-checked `<img>` instead of leaking a stray `!` before a link (which
+also made `_safe_href(image=True)` dead code on that path); an unterminated `<script>` now
+emits a diagnostic instead of silently truncating the body; and raw-HTML `target="_blank"`
+anchors get the same `rel="noreferrer noopener"` the Markdown path already added.
+
+**A third review round found the HTML path was broken outright.** `meta`, `link` and
+`base` are void elements: `html.parser` fires `handle_starttag` for them but never a
+matching `handle_endtag`. Because they were also in `DROP_TAGS`, each bare `<meta charset>`
+incremented the skip counter permanently, so every real HTML5 document — anything with a
+charset meta or a stylesheet link in `<head>` — swallowed its entire body and reported
+"No reviewable blocks". The documented landing-page use case simply did not work; earlier
+HTML fixtures happened to use `<title>`/`<style>` only, which is why three rounds missed it.
+Void drop-tags no longer touch the counter. `--sample` now builds **both** a Markdown and a
+full-DOCTYPE HTML fixture, asserts the expected block count for each, exits 2 on regression,
+and writes to a temp dir so a sample run cannot litter the caller's cwd. Same round:
+`xlink:href` joined the URL allowlist (SVG anchors still honour it, so
+`<svg><a xlink:href="javascript:...">` bypassed the plain `href` check), and `status` now
+previews **every** gate rule through a shared `gate_refusals()` — previously it looked only
+at blocking items, so a round with no named reviewer reported 0 while `close` refused on G3.
+
+**A sixth round caught the void-element fix having been only half-applied, and a forgery
+route through the artifact itself.** The round-three commit message claimed "meta, link and
+base are void elements", but only `meta` and `link` reached `VOID` — so `<base href="/">`,
+which sits in the `<head>` of a great many real pages, still swallowed the whole body and
+returned "No reviewable blocks". `VOID` is now the complete HTML spec list rather than a
+hand-picked subset, and `SAMPLE_HTML` carries a `<base>` tag so the regression gate would
+catch a third recurrence. Separately: a reviewed HTML artifact carrying its own
+`data-hg="..."` attribute kept it, and the builder appended a second — browsers honour the
+*first*, and attribute values may contain raw newlines, so a crafted artifact could inject
+a forged `## APPROVE` heading into the exported sidecar. That is the same silent-false-approval
+failure G7 exists to prevent, arriving through the artifact instead of the sidecar. Reserved
+attributes (`data-hg`) and reserved element ids (the page's own `doc`, `items`, `reviewer`,
+`export`, …) are now stripped from reviewed HTML before anchoring.
+
+**G7 came out of the first PR review round** and closes a real hole: a mistyped severity heading
+(`## BLOKCER`) silently downgrades to `NIT`, so before this a reviewer's genuine blocker
+could be lost to a typo and `close` would still exit 0. Reproduced, then fixed — the
+parser's integrity problems (unknown severity, EDIT with no replacement text, a quote
+that is not in the target file) are now closer-blocking rather than advisory prose.
+Problems that already have their own rule (G2, G3) are filtered so they are not
+double-reported.
+
+**Loop discipline — the deliberate inversion of upstream.** There is no blocking poll:
+`status` returns immediately, `open` detects a headless host (`CI`, SSH, no `DISPLAY`)
+and says so rather than sending the agent to wait at a browser that will never appear,
+and rounds are capped with escalation on exhaustion. The sidecar is plain, hand-writable
+Markdown, so the loop still closes over SSH and in CI where no browser exists.
+
+**Optional bridge**, opt-in and asked-first: `npx -y human-review@0.6.0` — always
+pinned, never bare. It changes the editor; the gate still governs closure.
+
+Ships 3 references citing 7–8 sources each (Bainbridge *Ironies of Automation*,
+Parasuraman & Riley, Fagan inspection, Wiegers, Weinberg, *SWE at Google* ch. 9,
+W3C Web Annotation `TextQuoteSelector`, Conventional Comments, Klein pre-mortem,
+Nygard *Release It!*), a `batch.v1` JSON schema, a worked sidecar example,
+`cs-human-gate` agent, and `/cs:human-gate`. SKILL.md is a full PASS on the
+write-a-skill 6-item checklist; description validator PASS.
+
+### Changed — counters
+
+Merged on top of `book-to-skill`, which landed in `dev` while this branch was open:
+skills 363 → 364, tools 663 → 666, refs 746 → 749, agents 103 → 104,
+commands 118 → 119, plugins 89 → 90, engineering row 85 → 86
+(derived via `scripts/derive_counters.py --check`).
+
+---
+
+### book-to-skill: document → knowledge-base skill → plugin (this PR)
+
+### Added — `engineering/book-to-skill`
+
+Derived from [virgiliojr94/book-to-skill](https://github.com/virgiliojr94/book-to-skill)
+(MIT). Compiles a book, documentation folder, or spec collection (PDF, EPUB, DOCX,
+HTML, Markdown, RST, AsciiDoc, RTF, MOBI/AZW) into an agent skill: a resident master
+`SKILL.md` (core frameworks + chapter index + topic index, capped at 4k tokens) plus
+on-demand `chapters/chNN-*.md`, `glossary.md`, `patterns.md`, and a decision
+`cheatsheet.md`. The agent reads the core, then one chapter — never the whole source
+again.
+
+The extraction library (`scripts/book_to_skill/` — 12 modules including 7 per-format
+parsers) is vendored close to verbatim and keeps upstream's format chains, chapter
+detection across Latin/Roman/Chinese/Thai/Korean heading styles, invisible-Unicode
+(Trojan Source) sanitization, and the DOCX entity-expansion guard.
+
+**25 numbered deviations** are recorded in `engineering/book-to-skill/README.md`,
+which is the authoritative list. Highlights:
+
+- **(5) No implicit installs.** `--install-missing` defaults to `report` — it prints
+  the pip command and uses the stdlib fallback, where upstream prompts on a TTY and
+  runs `pip install` into the caller's environment.
+- **(6) Rights gate.** `skill_plugin_emitter.py --distribution shareable` refuses
+  without `--rights` from `public-domain|open-license|internal-docs|author-permission`.
+  `fair-use` is deliberately excluded — a defence, not a licence.
+- **(10) Merged, extended validator.** Upstream's two validators become one
+  four-family gate, adding **budget** (token caps) and **index** (dead chapter links,
+  unindexed chapter files, dangling topic refs) — the failure that silently breaks
+  navigation while the skill still looks complete, and which upstream did not check.
+- **(11)** Folded YAML scalars now parse, so a wrapped description no longer
+  under-reports its length past the 1024-char cap.
+- **(12)** `discovery_tax.py` → `token_budget_estimator.py`: optional `tiktoken` path
+  dropped, post-flight budget audit added, and an explicit **worth-converting
+  verdict** that says "just read it" when the source is under ~3× the compiled skill.
+
+- **(15) Private, per-invocation working directory.** Upstream's fixed
+  `<tempdir>/book_skill_work` is CWE-377/CWE-59 on a shared host — a local user can
+  pre-create it and plant a symlink named `full_text.txt`, and `Path.write_text` follows
+  symlinks. Now a fresh `mkdtemp` (0700, unpredictable) with 0600 artifacts; an explicit
+  `--workdir` is symlink-refused and mode-restricted. Also fixes a real bug: `parsers/calibre.py`
+  read a module-level path constant and so ignored `--workdir` entirely.
+
+- **(17) Zip-of-XML hardening generalized, plus decompression-bomb caps.** Upstream's
+  DTD/entity guard covered DOCX only; EPUB's `ebooklib` path handed the archive straight to a
+  third-party XML stack. The guard now lives in `book_to_skill/zip_safety.py` and runs for
+  both, and every archive read checks declared size and compression ratio before
+  decompressing — a 200 MB zip bomb is refused at ~14 MB peak RSS.
+- **(18) Packaging refuses a source tree containing symlinks.** `shutil.copytree` defaults to
+  following links, which would bake a link target's real content into a package that may be
+  emitted as `--distribution shareable`. `_assert_no_symlinks()` walks the whole tree and
+  refuses, before the validation branch so `--skip-validation` cannot bypass it.
+
+- **(19) The magic-byte sniff path goes through the size budget too.** Unknown-extension
+  files read a `mimetype` member with a bare `zf.read()` before any format was chosen —
+  ahead of every check in `zip_safety.py`. Now routed through `safe_read()`; a 200 MB
+  extensionless bomb is refused at ~15 MB peak RSS.
+- **(20) Emitter correctness and scope.** `--author`/`--author-url` now reach the printed
+  marketplace entry; a post-copy re-walk deletes the package if a symlink appears during the
+  copy (closing the check-then-act window); and `source.license_scope` records that the
+  top-level `license` covers the scaffolding, not the compiled notes.
+
+- **(21-24) Skill-quality audit** — read as a skill rather than as code. SKILL.md's
+  quick-start referenced `$WORKDIR`/`$SKILLS_HOME` without defining them (traceback if
+  followed literally; all five steps now execute verbatim); `token_budget_estimator.py
+  --skill-dir <typo>` reported a clean audit at exit 0 and now refuses; `epub.py`'s
+  `except (KeyError, Exception)` was silently disarming the zip-size refusal at that call
+  site; and `tool | head` no longer tracebacks.
+
+- **(25) Workdir race closed by fd pinning.** `mkdir(exist_ok=True)` does not raise on a
+  symlink-to-directory (its exists-branch follows symlinks), and a file inside a swapped
+  directory is not itself a link — so the artifact-level check could not back up the
+  directory-level one. The directory is now pinned with `O_NOFOLLOW|O_DIRECTORY` and both
+  artifacts written through that fd; `_write_private` creates with `O_CREAT|O_EXCL|O_NOFOLLOW`
+  at 0600. Verified against a live mid-write directory swap.
+
+**Repo-native addition with no upstream counterpart — Step 11 / `/cs:book-to-plugin`.**
+Upstream stops at a bare folder in `~/.claude/skills/`, which this library cannot route
+to. `skill_plugin_emitter.py` wraps a compiled skill as a full plugin package (manifest
++ `cs-<slug>` agent + `/cs:<slug>` command + README) and prints the marketplace entry.
+It never edits `marketplace.json` itself, refuses to wrap a skill carrying validation
+errors, and guards its `--force` overwrite path against symlinks, paths outside the
+destination root, and directories that are not plugin packages.
+
+Ships 4 stdlib-only tools (all `--help` / `--sample` / `--output json`), 5 references
+citing 7-8 sources each, 3 asset templates, a `cs-book-to-skill` agent, and
+`/cs:book-to-skill` + `/cs:book-to-plugin`.
+
+### Changed — `engineering/write-a-skill`
+
+Cross-linked to the new skill: "author first, compile second" — `write-a-skill` authors
+from expertise in your head, `book-to-skill` compiles from a document on disk.
+
+### Changed — engineering harness manifest
+
+Regenerated `engineering/agent-harness/.../assets/harnesses/engineering.json`. Picked up
+`book-to-skill` plus three skills that had drifted out of the manifest (`minimalist`,
+`skillopt-sleep`, `strict-api`): `skill_count` 81 → 85.
+
+### Changed — counters
+
+skills 362 → 363, tools 644 → 663, refs 741 → 746, agents 102 → 103, commands
+116 → 118, plugins 88 → 89 (derived via `scripts/derive_counters.py --check`).
+
+---
+
+### fable-goal: ramble → autonomous /goal prompt (previous PR)
 
 ### Added — `productivity/fable-goal`
 
@@ -29,7 +1223,7 @@ skills 357 → 358 (this PR also trues up pre-existing engineering-row drift
 355 → 357), tools 602 → 603, refs 731 → 732, commands 109 → 110, plugins
 83 → 84; plus a stale "711 reference docs" claim in README line 30 fixed to 732.
 
-## [Unreleased] — housekeeping: CHANGELOG backfill + per-domain counter validation
+### housekeeping: CHANGELOG backfill + per-domain counter validation
 
 ### Added — `derive_counters.py` per-domain table validation
 
@@ -56,7 +1250,7 @@ Backfilled, newest-first:
 - **`engineering-team/skills/named-persona-adversarial-review`** (PR #867, superseding #866 by @YuhaoLin2005) — code review through named, sourced engineering philosophies with confidence-leveled attribution and an anti-fabrication rule for quotes.
 - **`productivity/roast`** (PR #865) — 5-angle adversarial idea panel (Critic/Champion/Analyst/Investigator/Customer) → one GO/RESHAPE/KILL verdict, with a weighted veto-gated synthesizer + cheapest-48h-test designer.
 
-## [Unreleased] — local-seo-manager: local / Map-Pack SEO skill (this PR)
+### local-seo-manager: local / Map-Pack SEO skill (this PR)
 
 ### Added — `marketing-skill/skills/local-seo-manager`
 
@@ -77,7 +1271,7 @@ plumbing, cleaning, electrical).
 - No `plugin.json` / marketplace entry needed — the `marketing-skills` plugin globs `./skills`.
 - Counters: 352 → 353 skills, 590 → 593 Python tools, 718 → 721 references.
 
-## [Unreleased] — newgen audit follow-up: P0 fixes, path sweep, CI guards
+### newgen audit follow-up: P0 fixes, path sweep, CI guards
 
 ### Deprecated / Removed Skills (migration notes)
 
@@ -94,7 +1288,7 @@ Also restructured (no content change): `engineering/universal-scraping-architect
 moved its SKILL.md from plugin root to the standard `skills/universal-scraping-architect/`
 layout. Marketplace source path is unchanged.
 
-## [Unreleased] — code-reviewer: C-specific smell detector + fixtures
+### code-reviewer: C-specific smell detector + fixtures
 
 ### Added — language-specific smell pack for C (this PR)
 
@@ -118,7 +1312,7 @@ Verification: all 6 fixtures (C# / Java / C × smells / clean) match their commi
 
 ---
 
-## [Unreleased] — code-reviewer: 6 new languages + analyzer wiring + doc sync
+### code-reviewer: 6 new languages + analyzer wiring + doc sync
 
 ### Added — language coverage 7 → 13 (PR #769)
 
@@ -155,7 +1349,7 @@ Verification: `python3 scripts/code_quality_checker.py --help` now lists all 14 
 
 ---
 
-## [Unreleased] — Mistral Vibe cross-platform installation (closes #705)
+### Mistral Vibe cross-platform installation (closes #705)
 
 ### Added
 
@@ -768,7 +1962,7 @@ This release establishes the pattern for deriving MIT-licensed external skills i
 
 ### Fixed
 
-- **3 missing voice specs added to `c-level-advisor/c-level-agents/references/persona-voices.md`:**
+- **3 missing voice specs added to `c-level-agents/references/persona-voices.md`:**
   - `cs-ceo-advisor` — The Strategic Translator (tree-of-thought reasoning; refuses to debate tactics until the strategic question is named)
   - `cs-cto-advisor` — The Architecture-First Pragmatist (ReAct reasoning; treats every architecture decision as a 3-year commitment)
   - `cs-general-counsel-advisor` — The Risk-Paranoid Lawyer (Not Your Lawyer) — carry-over from v2.5.1
@@ -784,7 +1978,7 @@ Both gaps were carry-over items noted across multiple PRs in this session (v2.5.
 
 ### Changed
 
-- `c-level-advisor/c-level-agents/references/persona-voices.md` — 13 → 13 voice specs cataloged (all cs-* agents in the persona-voices list now match the agents that exist)
+- `c-level-agents/references/persona-voices.md` — 13 → 13 voice specs cataloged (all cs-* agents in the persona-voices list now match the agents that exist)
 - `agents/c-level/cs-ceo-advisor.md` — 32 path corrections
 - `agents/c-level/cs-cto-advisor.md` — 25 path corrections
 
@@ -809,8 +2003,8 @@ No skill/agent/command count changes; no manifest version bumps (this is a pure-
   - `engineering_hiring_funnel.md` — 7-stage funnel + healthy conversion benchmarks + leakage diagnosis per stage + pipeline volume math + sourcing channel diversification + technical interview design + cost-per-hire. Cites LinkedIn Talent Insights, Atlassian Recruiting Ops, Levels.fyi + Pave, Lou Adler "Hire With Your Head", Adler/Bock "Work Rules!", CMU/Booth interview validity research, SHRM surveys.
   - `eng_team_structure.md` — Conway's Law + headcount-to-structure map + span-of-control benchmarks + EM vs tech lead distinction + manager/director/VPE triggers + squad sizing + chapter discipline. Cites Kniberg "Scaling Agile @ Spotify", Kniberg 2020 retrospective, Will Larson "Elegant Puzzle", Camille Fournier "Manager's Path", Conway 1968, Schwartz "A Seat at the Table", Lencioni "Five Dysfunctions", Stripe/Shopify/GitHub/Netflix engineering blogs.
   - `production_discipline.md` — On-call rotation design (≥ 6 people; burnout signals) + incident response (4-tier severity, IC role, blameless postmortems) + deployment cadence (continuous vs scheduled; progressive delivery) + SLO discipline integration + 5-level maturity model. Cites Google SRE (Beyer/Jones/Petoff/Murphy), SRE Workbook, John Allspaw postmortem writings, PagerDuty Incident Response docs, Charity Majors observability, Nora Jones chaos engineering, Mikey Dickerson reliability hierarchy.
-- **cs-vpe-advisor** agent (`./c-level-advisor/c-level-agents/agents/cs-vpe-advisor.md`) — throughput-first operator. Voice: "What's your cycle time, and where does the work spend most of its time waiting?" Trusts DORA metrics over vibe. Refuses to recommend hires without naming the throughput or quality bottleneck they unblock.
-- **`/cs:vpe-review`** slash command (`./c-level-advisor/c-level-agents/skills/vpe-review/SKILL.md`) — 6-question forcing interrogation: cycle time + waits, DORA verdict, hiring funnel leakage, team structure health, production discipline maturity, VPE-vs-CTO scope decision.
+- **cs-vpe-advisor** agent (`./c-level-agents/agents/cs-vpe-advisor.md`) — throughput-first operator. Voice: "What's your cycle time, and where does the work spend most of its time waiting?" Trusts DORA metrics over vibe. Refuses to recommend hires without naming the throughput or quality bottleneck they unblock.
+- **`/cs:vpe-review`** slash command (`./c-level-agents/skills/vpe-review/SKILL.md`) — 6-question forcing interrogation: cycle time + waits, DORA verdict, hiring funnel leakage, team structure health, production discipline maturity, VPE-vs-CTO scope decision.
 - **cs-vpe-advisor voice spec** added to `persona-voices.md`.
 - **Dual-published from the start:** standalone plugin at `c-level-advisor/vpe-advisor/` with mirrored content (per #624 pattern). `sync_skill_bundles.py` keeps both copies aligned.
 
@@ -871,8 +2065,8 @@ DORA benchmarks come from cross-industry research; specific thresholds shift wit
   - `customer_segmentation_strategy.md` — 4-tier framework + ICP fit weighting (7 signals) + tier transition triggers + kill list criteria + the 3 paths. Cites Lincoln Murphy, Bain "Loyalty Effect", Tunguz, Skok, ChartMogul/ProfitWell, Adamson/Dixon/Toman "Challenger Customer".
   - `cs_coverage_model.md` — Tech-touch / pooled / named / named+exec models + ARR-per-CSM ratios by stage and segment + manager-trigger + CS comp design + ramp curves. Cites Gainsight, TSIA, Mehta/Pickens "Customer Success Economy", ChurnZero, Skok, Lincoln Murphy, Pacific Crest/KeyBanc SaaS survey.
   - `cs_team_org_evolution.md` — 5-stage role map + 6-role definition table (CSM ≠ Support ≠ AM ≠ IM ≠ CS Ops ≠ Customer Marketing) + AM-vs-CSM split decision + 7 anti-patterns. Cites Mehta/Steinman/Murphy, Mehta/Pickens, BVP, TSIA, Gainsight, ChurnZero, Lincoln Murphy.
-- **cs-cco-advisor** agent (`./c-level-advisor/c-level-agents/agents/cs-cco-advisor.md`) — retention-obsessed pragmatist. Voice: "What's your gross retention rate, and what's the #1 reason customers leave?" Trusts gross retention over NRR. Refuses to recommend CS hires without naming the customer outcome they unblock.
-- **`/cs:cco-review`** slash command (`./c-level-advisor/c-level-agents/skills/cco-review/SKILL.md`) — 6-question forcing interrogation: GRR (not NRR), top churn driver, time-to-value, kill-list candidates, ARR-per-CSM ratio + coverage model, CS comp alignment.
+- **cs-cco-advisor** agent (`./c-level-agents/agents/cs-cco-advisor.md`) — retention-obsessed pragmatist. Voice: "What's your gross retention rate, and what's the #1 reason customers leave?" Trusts gross retention over NRR. Refuses to recommend CS hires without naming the customer outcome they unblock.
+- **`/cs:cco-review`** slash command (`./c-level-agents/skills/cco-review/SKILL.md`) — 6-question forcing interrogation: GRR (not NRR), top churn driver, time-to-value, kill-list candidates, ARR-per-CSM ratio + coverage model, CS comp alignment.
 - **cs-cco-advisor voice spec** added to `persona-voices.md`.
 - **Dual-published from the start:** standalone plugin at `c-level-advisor/chief-customer-officer-advisor/` with mirrored content (per the same pattern as #624 for GC/CDO/CAIO). `sync_skill_bundles.py` keeps both copies aligned.
 
@@ -934,8 +2128,8 @@ Retention benchmarks vary significantly by ACV, segment, and industry. This skil
   - `ai_risk_governance.md` — Full EU AI Act tier map (prohibited Article 5, high-risk Article 6 + Annex III, limited-risk Article 50, minimal-risk) with all 8 high-risk domains + 11 obligation Articles. NIST AI RMF 1.0 (4 functions, 7 trustworthy characteristics). US state patchwork (NYC LL 144, CO AI Act, IL HB 53, CA SB 1001, CA AB 2013, CA AB 1008, IL BIPA, WA MHMD, TX biometric). Industry overlays (FDA, CFPB, Fed SR 11-7, NYDFS Reg 23, ECOA, NAIC). 10-item governance program checklist. When-to-hire-AI-counsel criteria.
   - `ai_cost_economics.md` — 2026 API pricing across 4 tiers, GPU rental (A100/H100/H200/B200), throughput estimates, GPU count by model size, cost-per-million-tokens calculations, utilization reality (interactive 20-40%, batch 60-80%), 6 hidden costs of self-hosted, 6 hidden costs of API, migration cost (3-6 months, 2-3 engineers), prompt caching as economics lever. Cites vLLM paper, DistServe (NSDI 2024), HELM benchmark, Artificial Analysis, Llama 3.1 paper.
   - `ai_team_org_evolution.md` — 5-stage role map (pre-seed → late-stage), 9-role definition table distinguishing AI engineer / ML engineer / research scientist / data scientist / AI safety / AI PM / Head of AI / CAIO. AI team vs data team contrast (8 dimensions). 7 specific anti-patterns. Hiring sequencing rule. Cites Huyen "Designing ML Systems" + "AI Engineering", State of AI Report, Karpathy's AI engineer archetype discussions.
-- **cs-caio-advisor** agent (`./c-level-advisor/c-level-agents/agents/cs-caio-advisor.md`) — eval-demanding realist orchestrating the skill. Voice: "What does this AI need to be good at, and how would you measure it?" Treats every AI use case as a hiring decision; pushes back on AI hype; demands fallback behavior before scale.
-- **`/cs:caio-review`** slash command (`./c-level-advisor/c-level-agents/skills/caio-review/SKILL.md`) — 6-question forcing interrogation: eval discipline, hallucination SLO, regulatory tier, model selection, cost trajectory, role-that-unblocks-this.
+- **cs-caio-advisor** agent (`./c-level-agents/agents/cs-caio-advisor.md`) — eval-demanding realist orchestrating the skill. Voice: "What does this AI need to be good at, and how would you measure it?" Treats every AI use case as a hiring decision; pushes back on AI hype; demands fallback behavior before scale.
+- **`/cs:caio-review`** slash command (`./c-level-agents/skills/caio-review/SKILL.md`) — 6-question forcing interrogation: eval discipline, hallucination SLO, regulatory tier, model selection, cost trajectory, role-that-unblocks-this.
 - **cs-caio-advisor voice spec** added to `persona-voices.md`.
 
 ### Why This Matters
@@ -993,8 +2187,8 @@ The `chief-ai-officer-advisor` skill surfaces strategic AI decisions but is **no
   - `data_product_strategy.md` — Decision: which architecture and what do we build? Stage-driven kill criteria per architecture + 6-layer build-vs-buy decision tree + sequencing pattern + anti-patterns.
   - `customer_data_as_asset.md` — Decision: what's our data worth and can we productize it? 5-component valuation framework + M&A multiplier with carve-out impact + 3 productization paths with prerequisites + 10-item M&A diligence prep checklist + quarterly contractual constraint audit pattern.
   - `data_team_org_evolution.md` — Decision: what role next, when to centralize vs embed? 5-stage map (seed → late-stage) with specific role definitions + centralize-vs-embed-vs-federated triggers + 6 anti-patterns ("hiring data scientist as first data hire" etc.).
-- **cs-cdo-advisor** agent (`./c-level-advisor/c-level-agents/agents/cs-cdo-advisor.md`) — decision-driven realist orchestrating the skill. Voice: "What decision does this data drive?" Refuses to recommend tooling before naming the consumer. Treats AI training data as both contractual liability and strategic asset.
-- **`/cs:cdo-review`** slash command (`./c-level-advisor/c-level-agents/skills/cdo-review/SKILL.md`) — 6-question forcing interrogation pattern matching the /cs:cfo-review / /cs:gc-review etc. shape.
+- **cs-cdo-advisor** agent (`./c-level-agents/agents/cs-cdo-advisor.md`) — decision-driven realist orchestrating the skill. Voice: "What decision does this data drive?" Refuses to recommend tooling before naming the consumer. Treats AI training data as both contractual liability and strategic asset.
+- **`/cs:cdo-review`** slash command (`./c-level-agents/skills/cdo-review/SKILL.md`) — 6-question forcing interrogation pattern matching the /cs:cfo-review / /cs:gc-review etc. shape.
 - **cs-cdo-advisor voice spec** added to `persona-voices.md`.
 
 ### Why This Matters
@@ -1043,7 +2237,7 @@ The `chief-data-officer-advisor` skill surfaces strategic decisions but is **not
   - **`references/contracts_playbook.md`** — 7 standard startup contracts (MSA, customer SaaS, NDA, DPA, employment, contractor, equity), top redlines per type, quick triage heuristics.
   - **`references/ip_and_regulatory.md`** — Full IP strategy (patents, copyright, trademark, trade secrets, invention assignment, OSS license compliance for permissive/weak-copyleft/strong-copyleft including AGPL) plus regulatory trigger matrix (HIPAA, PCI DSS, BSA/AML, FDA 510(k), MDR, GDPR, CCPA, COPPA, securities, ITAR, EU AI Act, telehealth, insurance) with SOC 2 → ISO 27001 → ISO 42001 sequencing and when-to-hire-a-GC criteria.
   - **`references/term_sheet_decoder.md`** — Full term sheet glossary, founder-friendly defaults cheat sheet, the three clauses that matter most (liquidation preference, option pool pre/post-money, anti-dilution), and negotiation strategy.
-- **cs-general-counsel-advisor** agent (`./c-level-advisor/c-level-agents/agents/cs-general-counsel-advisor.md`) — risk-paranoid persona orchestrating the skill via `/cs:gc-review`. Distinct voice: "Before we sign, three things need to be settled in writing." Hard rule: never gives definitive legal advice; always escalates to qualified outside counsel.
+- **cs-general-counsel-advisor** agent (`./c-level-agents/agents/cs-general-counsel-advisor.md`) — risk-paranoid persona orchestrating the skill via `/cs:gc-review`. Distinct voice: "Before we sign, three things need to be settled in writing." Hard rule: never gives definitive legal advice; always escalates to qualified outside counsel.
 - **`/cs:gc-review`** updated to invoke the new tools and reference the skill (the command previously pointed at a planned skill with a CHANGELOG note).
 
 ### Why This Matters
@@ -1067,7 +2261,7 @@ The `general-counsel-advisor` skill and `cs-general-counsel-advisor` agent are *
 
 ### Added — C-Level Advisory
 
-- **c-level-agents** plugin (`./c-level-advisor/c-level-agents/`) — surfaces the existing 28 c-level skills through a founder-mode interface of cs-* persona agents and `/cs:*` slash commands. New marketplace entry registered separately (category: leadership).
+- **c-level-agents** plugin (`./c-level-agents/`) — surfaces the existing 28 c-level skills through a founder-mode interface of cs-* persona agents and `/cs:*` slash commands. New marketplace entry registered separately (category: leadership).
 - **8 new cs-* persona agents** with distinct cognitive voices, completing agent coverage for every C-role:
   - `cs-cfo-advisor` (numerate skeptic) wraps cfo-advisor
   - `cs-cmo-advisor` (narrative-first) wraps cmo-advisor

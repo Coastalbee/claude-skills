@@ -1,9 +1,10 @@
 ---
+name: cs-fullstack-review
 description: Fullstack engineering review — walks the 7 Matt Pocock forcing questions, picks the profile, forks into POWERFUL specialists (api-design-reviewer, database-designer, slo-architect). Invokes the cs-fullstack-engineer agent with context fork.
 argument-hint: "<problem or codebase to review>"
 ---
 
-# /cs:fullstack-review — Fullstack engineering review
+# /cs-fullstack-review — Fullstack engineering review
 
 Use the `cs-fullstack-engineer` agent (which uses `context: fork` to keep the parent thread clean) to handle this inquiry:
 
@@ -66,7 +67,7 @@ Profiles live at `engineering-team/skills/senior-fullstack/profiles/`. To custom
 
 ## Related commands
 
-- `/cs:frontend-review` — frontend-only deep dive
-- `/cs:backend-review` — backend-only deep dive
-- `/cs:engineer-grill` — cross-role 21-question forcing-question runner
+- `/cs-frontend-review` — frontend-only deep dive
+- `/cs-backend-review` — backend-only deep dive
+- `/cs-engineer-grill` — cross-role 21-question forcing-question runner
 - `/karpathy-check` — Karpathy 4-principle review before commit

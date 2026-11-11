@@ -27,7 +27,7 @@ import re
 import sys
 import urllib.request
 import urllib.error
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -116,11 +116,11 @@ def score_dimension(signals: dict, scale: int = 100) -> int:
 def fetch_url(url: str, timeout: int = 15) -> str | None:
     """Fetch raw HTML from URL using urllib (stdlib). Returns None on failure."""
     try:
-        req = urllib.request.Request(
+        req = urllib.request.Request(  # noqa: SEC-AUDITOR (fetches only the URL the user passes, by design)
             url,
             headers={"User-Agent": "Mozilla/5.0 (aeo_audit.py; stdlib urllib)"}
         )
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: SEC-AUDITOR (fetches only the URL the user passes, by design)
             return resp.read().decode("utf-8", errors="replace")
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
         sys.stderr.write(f"[aeo_audit] URL fetch failed: {e}\n")
@@ -207,7 +207,7 @@ def audit(text: str, url: str | None, industry: str) -> dict:
     return {
         "url": url,
         "industry": industry,
-        "audited_at": datetime.utcnow().isoformat() + "Z",
+        "audited_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + "Z",
         "composite_score": composite,
         "verdict": verdict,
         "threshold": threshold,

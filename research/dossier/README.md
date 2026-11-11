@@ -25,7 +25,7 @@ Part of the **research pack** (sibling of `pulse`, `litreview`, `grants`). Share
 
 ## Source spec
 
-[`megaprompts/12-dossier-megaprompt.md`](../../megaprompts/12-dossier-megaprompt.md) (PR #657).
+`megaprompts/12-dossier-megaprompt.md` (maintainer-local draft spec — gitignored, not in the public repo) (PR #657).
 
 ## Plugin layout
 
@@ -34,7 +34,7 @@ research/dossier/
 ├── .claude-plugin/plugin.json
 ├── README.md
 ├── agents/cs-dossier.md             ← hypothesis-testing persona; Q4 enforcer
-├── commands/cs-dossier.md           ← /cs:dossier <entity>
+├── commands/cs-dossier.md           ← /cs-dossier <entity>
 └── skills/dossier/
     ├── SKILL.md
     ├── references/

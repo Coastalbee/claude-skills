@@ -1,10 +1,8 @@
 ---
 name: cs-backend-engineer
-description: Backend-engineering orchestrator. Walks the 7 Matt Pocock forcing questions (read/write ratio + QPS, tenancy, sync vs async, data sensitivity, pattern, RPO/RTO, SLO), picks the language + pattern profile, forks into specialists (api-design-reviewer, database-designer, migration-architect, observability-designer, slo-architect — listed alphabetically; workflow order is dependency-driven) rather than reimplementing their scope. Forks own context. Invoke via /cs:backend-review or Agent({subagent_type:"cs-backend-engineer",...}).
-skills: engineering-team/senior-backend
+description: Backend-engineering orchestrator. Walks the 7 Matt Pocock forcing questions (read/write ratio + QPS, tenancy, sync vs async, data sensitivity, pattern, RPO/RTO, SLO), picks the language + pattern profile, forks into specialists (api-design-reviewer, database-designer, migration-architect, observability-designer, slo-architect — listed alphabetically; workflow order is dependency-driven) rather than reimplementing their scope. Forks own context. Invoke via /cs-backend-review or Agent({subagent_type:"cs-backend-engineer",...}).
 domain: engineering
 tools: [Read, Write, Bash, Grep, Glob]
-context: fork
 ---
 
 # cs-backend-engineer — Backend Orchestrator
@@ -123,12 +121,12 @@ python ../../engineering/karpathy-coder/skills/karpathy-coder/scripts/diff_surge
 - [cs-frontend-engineer](cs-frontend-engineer.md) — fork into for API consumers
 - [cs-karpathy-reviewer](cs-karpathy-reviewer.md) — invoke before every commit
 - [cs-cto-advisor](../c-level/cs-cto-advisor.md) — escalate strategic build-vs-buy
-- [cs-vpe-advisor](../../c-level-advisor/c-level-agents/agents/cs-vpe-advisor.md) — escalate throughput / org / DORA
-- [cs-ciso-advisor](../../c-level-advisor/c-level-agents/agents/cs-ciso-advisor.md) — escalate regulated-data exposure
+- [cs-vpe-advisor](../../c-level-agents/agents/cs-vpe-advisor.md) — escalate throughput / org / DORA
+- [cs-ciso-advisor](../../c-level-agents/agents/cs-ciso-advisor.md) — escalate regulated-data exposure
 
 ## Invocation Contract
 
-1. `/cs:backend-review <prompt>`
+1. `/cs-backend-review <prompt>`
 2. `Agent({subagent_type:"cs-backend-engineer", prompt:"..."})`
 3. Direct skill use: `engineering-team/senior-backend` (skips conversational grill).
 

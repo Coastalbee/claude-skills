@@ -8,7 +8,7 @@ The DNA of every skill in this repository. Follow this standard when creating ne
 
 ```markdown
 ---
-name: skill-name
+name: skill-name   # NEVER a bare Claude Code built-in command word (status, review, init, resume, config, help, ...) — it shadows the built-in for every installer (issue #885). Use a namespaced leaf like memory-status / pw-review; scripts/check_skill_names.py enforces this in CI.
 description: "When to use this skill. Include trigger keywords and phrases users might say. Mention related skills for disambiguation."
 license: MIT
 metadata:
@@ -111,7 +111,7 @@ Use that context and only ask for information not already covered.
 
 | Domain | Context File | Created By |
 |--------|-------------|-----------|
-| C-Suite | `company-context.md` | `/cs:setup` (cs-onboard skill) |
+| C-Suite | `company-context.md` | `/cs-onboard setup` (cs-onboard skill) |
 | Marketing | `marketing-context.md` | marketing-context skill |
 | Engineering | `project-context.md` | codebase-onboarding skill |
 | Product | `product-context.md` | product-strategist skill |

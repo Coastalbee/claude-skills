@@ -38,7 +38,7 @@ All 6 routing targets now exist in `research/` (post-cleanup PR #667).
 
 ## Source spec
 
-[`megaprompts/13-research-megaprompt.md`](../../megaprompts/13-research-megaprompt.md) (PR #657).
+`megaprompts/13-research-megaprompt.md` (maintainer-local draft spec — gitignored, not in the public repo) (PR #657).
 
 ## Plugin layout
 
@@ -47,7 +47,7 @@ research/research/
 ├── .claude-plugin/plugin.json
 ├── README.md
 ├── agents/cs-research.md            ← router persona, routing-transparency enforcer
-├── commands/cs-research.md          ← /cs:research <question>
+├── commands/cs-research.md          ← /cs-research <question>
 └── skills/research/
     ├── SKILL.md
     ├── references/

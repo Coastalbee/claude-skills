@@ -54,8 +54,8 @@ SAMPLE: Dict[str, Any] = {
 # 2026 API pricing per million tokens, $USD (input / output). These are illustrative;
 # real pricing changes; rerun this calculator quarterly.
 API_PRICING = {
-    "frontier-premium": {"input": 3.00, "output": 15.00, "label": "Claude Sonnet 4.6 / GPT-4o-tier"},
-    "frontier-economy": {"input": 1.25, "output": 5.00, "label": "Gemini 2.5 Flash / Claude Haiku 4.5-tier"},
+    "frontier-premium": {"input": 3.00, "output": 15.00, "label": "Claude Sonnet 5 / frontier-mid tier"},
+    "frontier-economy": {"input": 1.25, "output": 5.00, "label": "Claude Haiku 4.5 / small-model tier"},
     "open-router-hosted": {"input": 0.50, "output": 1.50, "label": "Llama 3.1 70B / Qwen 2.5 72B via hosted endpoint"},
 }
 
@@ -204,7 +204,7 @@ def pick_recommendation(profile: Dict[str, Any], costs: Dict[str, float]) -> Tup
                 "Iterate on prompt engineering and eval discipline before committing to fine-tune."
             ),
             [
-                "Vendor lock-in: build abstraction layer (LiteLLM, OpenRouter) for multi-vendor failover",
+                "Vendor lock-in: build abstraction layer (LiteLLM, OpenRouter, Bifrost) for multi-vendor failover",
                 "Capability drift between model versions: pin model IDs and run regression evals on upgrades",
                 "Rate limits at QPS spikes: confirm Tier-4+ pricing with provider",
             ],

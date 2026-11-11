@@ -34,7 +34,7 @@ Users find it where they expect (research/), but it's the only research-domain s
 
 ## Source spec
 
-[`megaprompts/03-notebooklm-megaprompt.md`](../../megaprompts/03-notebooklm-megaprompt.md) (PR #657).
+`megaprompts/03-notebooklm-megaprompt.md` (maintainer-local draft spec — gitignored, not in the public repo) (PR #657).
 
 ## Plugin layout
 
@@ -43,7 +43,7 @@ research/notebooklm/
 ├── .claude-plugin/plugin.json
 ├── README.md
 ├── agents/cs-notebooklm.md          ← browser-automation persona, async-discipline enforcer
-├── commands/cs-notebooklm.md        ← /cs:notebooklm (or auto-triggers on phrases)
+├── commands/cs-notebooklm.md        ← /cs-notebooklm (or auto-triggers on phrases)
 └── skills/notebooklm/
     ├── SKILL.md
     ├── references/
